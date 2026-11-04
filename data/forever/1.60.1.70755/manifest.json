@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "build": "1.60.1.70755",
   "locale": "esES",
-  "generatedAt": "2026-11-04T08:46:21.881Z",
+  "generatedAt": "2026-11-04T09:16:01.940Z",
   "hotfixesApplied": true,
   "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
   "classes": [
@@ -249,7 +249,7 @@
     {
       "classId": 5,
       "file": "abilities/priest.json",
-      "sha256": "c3683cbca8a5207924220be9620c101de900095d526282b41e05540694e35477",
+      "sha256": "f995bcbd4662d1abcdfee2e5afe99ca8aae2f3b9cac14625baeaacfce7eb365c",
       "abilityCount": 75,
       "rankCount": 269
     },
