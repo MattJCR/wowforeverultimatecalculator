@@ -30,7 +30,7 @@ export const RACIAL_SPELLS: Record<number, number[][]> = {
 /**
  * Raciales cuyo texto de ChrRaceRacialAbility contradice al de su propio hechizo (en el 70685 la tabla traía «5 min» y el hechizo 30 s sin línea Ley / convergencia cerca; en el 70707 la tabla de Visión cielonata dice 15 s y el hechizo 30 s; la de Precisión de artesano dice «crítico» y el hechizo, igual que la referencia, «golpear»): la web usa el texto del hechizo, que lleva las duraciones que sí se aplican.
  */
-export const RACIAL_TEXT_FROM_SPELL = new Set([1259705 /* Lectura de línea Ley */, 1259686 /* Visión cielonata */, 1259719 /* Precisión de artesano */]);
+export const RACIAL_TEXT_FROM_SPELL = new Set([1259705 /* Leer línea Ley (el 70755 ya la traduce el cliente) */, 1259686 /* Visión cielonata */, 1259719 /* Precisión de artesano */]);
 
 /** Aura del cliente -> significado. Cada una se comprobo contra el texto de las raciales que la usan. */
 const AURA_KINDS: Record<number, RacialEffect["kind"]> = {

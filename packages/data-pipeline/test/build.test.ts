@@ -17,7 +17,7 @@ import { buildLegacy } from "../src/legacy.js";
 import { buildUnassigned } from "../src/unassigned.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70707";
+const BUILD = "1.60.1.70755";
 const load = (dir: string) => buildClassTalents(openRawTables(join(root, "data", "raw", dir)), BUILD, "esES");
 
 /** Con los hotfixes de la cache del juego aplicados: la verdad "en vivo". */
@@ -28,7 +28,7 @@ const legacyData = buildLegacy(openRawTables(join(root, "data", "raw", `${BUILD}
 const byToken = (r: typeof live, t: string) => r.classes.find((c) => c.classToken === t)!;
 const TOKENS = ["DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"];
 
-describe("arboles de talentos de Forever (cliente 1.60.1.70707, con hotfixes)", () => {
+describe("arboles de talentos de Forever (cliente 1.60.1.70755, con hotfixes)", () => {
   it("cumple el esquema en todas las clases", () => {
     for (const c of live.classes) expect(() => ClassTalents.parse(c)).not.toThrow();
   });
@@ -265,7 +265,7 @@ describe("seccion aparte: datos sin asignar", () => {
     const entries = raw.table("TraitNodeEntry").length;
     const linked = new Set(raw.table("TraitNodeXTraitNodeEntry").map((l) => l.TraitNodeEntryID)).size;
     expect(un.orphanEntries).toHaveLength(entries - linked);
-    expect(un.orphanEntries.length).toBe(102); // 98 + Hielo penetrante (Piercing Ice), retirado el 20/10 + Enfoque Arcano, retirado en el 70685 + Especialización en armas de una mano y Sello de furia mejorado, retirados en el 70707: se conservan sin nodo
+    expect(un.orphanEntries.length).toBe(104); // 70755: +2 (Distraer mejorado, retirado del árbol del Pícaro, y una entrada sin nombre) sobre los 102 del 70707; 98 + Hielo penetrante (Piercing Ice), retirado el 20/10 + Enfoque Arcano, retirado en el 70685 + Especialización en armas de una mano y Sello de furia mejorado, retirados en el 70707: se conservan sin nodo
     for (const e of un.orphanEntries) expect(e.selectable).toBe(false);
     expect(new Set(un.orphanEntries.map((e) => e.entryId)).size).toBe(un.orphanEntries.length);
   });
@@ -300,7 +300,7 @@ describe("seccion aparte: datos sin asignar", () => {
     const legacyOnes = un.orphanEntries.filter((e) => e.isLegacy);
     const others = un.orphanEntries.filter((e) => !e.isLegacy);
     expect(legacyOnes).toHaveLength(54);
-    expect(others).toHaveLength(48);
+    expect(others).toHaveLength(50); // 48 hasta el 70707; +2 en el 70755 (Distraer mejorado y una entrada sin nombre)
     const legacyIds = legacyData.specs.flatMap((s) => s.talents.map((t) => t.spellId)).filter((id) => id < 1_300_000);
     const lo = Math.min(...legacyIds);
     for (const e of legacyOnes) expect(e.spellId!).toBeGreaterThanOrEqual(lo);
@@ -337,21 +337,39 @@ describe("hotfixes del servidor frente a los ficheros estaticos", () => {
     const sig = (r: typeof live, tk: string) => byToken(r, tk).specs.flatMap((s) => s.talents).map((x) => `${x.nodeId}:${x.row}:${x.col}:${x.maxRank}`).join("|");
     // Mago (hotfixes del 19/10) y las tres clases del 70707 sí cambian su estructura respecto al estático
     const changed = TOKENS.filter((tk) => sig(live, tk) !== sig(stat, tk));
-    expect(changed).toEqual(["DRUID", "HUNTER", "MAGE", "PALADIN"]);
+    // El 70755 ya trae en el estático lo que el 70707 reordenaba por hotfix; ahora el hotfix reordena Pícaro, Chamán y Guerrero (rediseño del lanzamiento)
+    expect(changed).toEqual(["ROGUE", "SHAMAN", "WARRIOR"]);
   });
 });
 
 describe("contraste con la referencia (CC BY 4.0)", () => {
   const tf = join(root, "data", "external", "talentsforever");
-  it.each(TOKENS)("%s coincide en posiciones y rangos maximos", (token) => {
+  // El 70755 trae el rediseño de lanzamiento de Guerrero, Pícaro y Chamán que las notas de Blizzard del 3/11 describen (filas y rangos del cliente = las notas:
+  // Golpes temerarios fila 4, Torbellino mejorado fila 6 con 2 rangos, Aluvión 3 rangos, Enfurecer fila 3, Bebedor de entrañas fila 5…). La referencia, que declara el
+  // 70753, coloca otras columnas en esos árboles: manda el cliente y la diferencia queda fijada aquí (si la referencia se actualiza, la lista debe quedar vacía).
+  const REFERENCE_BEHIND: Record<string, string[]> = {
+    WARRIOR: ["spec 1 rango 5,2: cliente 3 vs web 2 (Improved Whirlwind)", "spec 1 solo cliente 5,0", "spec 1 solo referencia 3,2", "spec 1 solo referencia 5,1"],
+    ROGUE: [
+      "spec 1 rango 3,2: cliente 2 vs web 3 (Aggression)", "spec 1 rango 3,3: cliente 3 vs web 2 (Weapon Expertise)", "spec 1 solo cliente 4,0", "spec 1 solo referencia 4,3",
+      "spec 2 rango 1,0: cliente 2 vs web 3 (Camouflage)", "spec 2 rango 1,1: cliente 3 vs web 2 (Dirty Deeds)", "spec 2 rango 1,2: cliente 3 vs web 2 (Dirty Tricks)",
+      "spec 2 rango 1,3: cliente 2 vs web 3 (Improved Ambush)", "spec 2 rango 3,0: cliente 2 vs web 1 (Ghostly Strike)", "spec 2 rango 3,1: cliente 1 vs web 2 (Elusiveness)",
+    ],
+    SHAMAN: ["spec 1 solo cliente 1,2", "spec 1 solo referencia 1,3"],
+  };
+  it.each(TOKENS)("%s coincide en posiciones y rangos maximos (salvo lo que la referencia trae por detrás)", (token) => {
     const report = contrastClass(byToken(live, token), tf);
     expect(report).not.toBeNull();
-    expect(report!.ok).toBe(true);
+    const diffs = report!.specs.flatMap((sp) => [
+      ...sp.maxRankMismatches.map((m) => `spec ${sp.index} rango ${m}`),
+      ...sp.positionOnlyOurs.map((p) => `spec ${sp.index} solo cliente ${p}`),
+      ...sp.positionOnlyTheirs.map((p) => `spec ${sp.index} solo referencia ${p}`),
+    ]);
+    expect(diffs.sort()).toEqual([...(REFERENCE_BEHIND[token] ?? [])].sort());
   });
 
   it("suman 465 talentos en total (464 en el 70685, 465 hasta el 70658; el 70707 retira 2 del Paladín y añade 3)", () => {
     const total = live.classes.reduce((s, c) => s + c.specs.reduce((n, sp) => n + sp.talents.length, 0), 0);
-    expect(total).toBe(465);
+    expect(total).toBe(467); // 70755: Pícaro +1 (entran Golpes despiadados y Especialización en doble empuñadura, sale Distraer mejorado) y Guerrero +1 (Golpes temerarios)
   });
 });
 
@@ -418,7 +436,7 @@ describe("razas (CharBaseInfo + ChrRaceRacialAbility)", () => {
       expect(r.racials.map((a) => a.order)).toEqual([0, 1, 2, 3]);
     }
     expect(byId(1).racials.map((a) => `${a.kind}:${a.name}`)).toContain("passive:Crueldad");
-    expect(byId(95).racials.find((a) => a.name === "Lectura de línea Ley")?.kind).toBe("active");
+    expect(byId(95).racials.find((a) => a.name === "Leer línea Ley")?.kind).toBe("active");
   });
 
   it("interpreta los nombres de raciales en espanol e ingles", () => {
@@ -615,7 +633,7 @@ describe("cifras de las raciales (hechizos del cliente)", () => {
         // Cielonato trae los nombres en inglés en la tabla (sus hechizos sí están en español)
         "Elemental Insight -> Perspicacia elemental",
         "Elemental Insight -> Perspicacia elemental",
-        "Read Leyline -> Lectura de línea Ley",
+        "Read Leyline -> Leer línea Ley",
         "Skysight -> Visión cielonata",
         "Walk on Air -> Caminar sobre el aire",
         "Walk on Air -> Caminar sobre el aire",
@@ -629,7 +647,7 @@ describe("cifras de las raciales (hechizos del cliente)", () => {
     const rows = parseRawDescriptions(join(root, "data", "raw", `${BUILD}-hotfix`));
     expect(rows.get("95:1")).toContain("15 s");
     expect(rows.get("96:1")).toContain("15 s");
-    for (const [raceId, name, text] of [[95, "Lectura de línea Ley", /durante 15 s. Si hay una línea Ley cerca, obtienes En armonía durante 1 h/], [96, "Visión cielonata", /durante 30 s. Si hay una convergencia elemental cerca, obtienes Cargado durante 1 h/]] as const) {
+    for (const [raceId, name, text] of [[95, "Leer línea Ley", /durante 15 s. Si hay una línea Ley cerca, obtienes En armonía durante 1 h/], [96, "Visión cielonata", /durante 30 s. Si hay una convergencia elemental cerca, obtienes Cargado durante 1 h/]] as const) {
       const a = racesData.races.find((r) => r.id === raceId)!.racials.find((x) => x.name === name)!;
       expect(a.description, name).toMatch(text);
     }
@@ -753,7 +771,7 @@ describe("raciales cuyo valor esta en otro hechizo o es un proc", () => {
   });
 
   it("Leyline remite a 'En armonía': +50 % de regeneracion de salud y de mana (el texto dice que cerca de una línea Ley se duplica), sin duplicados", () => {
-    const e = spells(95, "Lectura de línea Ley")[0]!.effects;
+    const e = spells(95, "Leer línea Ley")[0]!.effects;
     expect(e.map((x) => x.kind).sort()).toEqual(["health-regen-pct", "mana-regen-pct"]);
     expect(e.every((x) => x.value === 50 && x.fromSpellId !== null)).toBe(true);
   });
@@ -849,16 +867,17 @@ describe("idioma: el cliente trae algunos textos de Forever en ingles", () => {
     expect(looksEnglish("")).toBe(false);
   });
 
-  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (19 desde el 70707)", () => {
+  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (10 desde el 70755)", () => {
     const own = all.filter(({ t }) => t.textOrigin === "translated-by-us").map(({ cls, t }) => `${cls}: ${t.name}`);
     // Hasta el 17/10 eran 13; los hotfixes del 19/10 traducen 12 y dejan Tromba de misiles en ingles (y le anaden Explosion de Escarcha)
     // El 70707 devuelve al inglés 18 textos de talentos (rediseño del Paladín y Druida, enfoques de lanzamiento…): traducción propia marcada en data/i18n/esES-overrides.json
+    // El 70755 traduce 13 de esos (Enfoques de lanzamiento, Filo de depredador, Canalización mejorada…: la traducción propia sobra) y devuelve al inglés 4 talentos nuevos del Pícaro
     expect([...own].sort()).toEqual(
       [
-        "Druida: Disciplina depredadora", "Druida: Enfoque de la naturaleza", "Druida: Floración", "Cazador: Filo de depredador", "Mago: Canalización mejorada", "Mago: Tromba de misiles",
-        "Paladín: Juicio presto", "Paladín: La hora de la verdad", "Paladín: Juramento de escudo", "Paladín: Especialización en armas de dos manos", "Paladín: Ahuyentar el mal",
-        "Sacerdote: Poder en la Luz", "Sacerdote: Enfoque crepuscular", "Sacerdote: Vínculo sagrado", "Chamán: Ojo de la tormenta", "Chamán: Enfoque curativo",
-        "Brujo: Concentración vil", "Brujo: Alcance destructivo", "Brujo: Intensidad",
+        "Druida: Disciplina depredadora", "Druida: Floración",
+        "Paladín: Juicio presto", "Paladín: Juramento de escudo", "Paladín: Ahuyentar el mal",
+        "Sacerdote: Vínculo sagrado",
+        "Pícaro: Salpicadura de sangre", "Pícaro: Veneno", "Pícaro: Destello de acero", "Pícaro: Cuchillo de bota",
       ].sort(),
     );
     expect(all.filter(({ t }) => t.textOrigin === "untranslated")).toEqual([]);
@@ -875,7 +894,7 @@ describe("idioma: el cliente trae algunos textos de Forever en ingles", () => {
     const skyborne = racesData.races.filter((r) => r.id >= 95).flatMap((r) => r.racials);
     expect(skyborne.map((a) => a.name)).not.toContain("Walk on Air");
     // Desde el hotfix del 19/10 el cliente trae el nombre y el texto en espanol (antes eran traduccion propia)
-    expect(skyborne.find((a) => a.name === "Lectura de línea Ley")!.textOrigin).toBe("client");
+    expect(skyborne.find((a) => a.name === "Leer línea Ley")!.textOrigin).toBe("client");
     expect(skyborne.filter((a) => looksEnglish(a.description))).toEqual([]);
     expect(skyborne.filter((a) => a.name === "Caminar sobre el aire")).toHaveLength(2);
   });
@@ -890,13 +909,13 @@ describe("habilidades del Pícaro (libro de hechizos del cliente)", () => {
 
   it("cumple el esquema y trae las lineas de Combate, Sutileza, Venenos y Asesinato", () => {
     expect(() => Abilities.parse(data)).not.toThrow();
-    expect(data.abilities).toHaveLength(53);
-    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(135);
+    expect(data.abilities).toHaveLength(55); // 53 hasta el 70707: entran Apuñalar, Marca de muerte y Marca de la muerte; sale el remate Veneno (ahora talento pasivo)
+    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(139); // 135 hasta el 70707: +Apuñalar (2 rangos), Marca de muerte (1), Marca de la muerte (3), -Veneno (1), -Mutilar 4.º rango (1)
   });
 
   it("Mutilar tiene los 4 rangos de la referencia: los golpes auxiliares de cada mano (sin texto) no cuentan como rangos", () => {
     const m = data.abilities.find((a) => a.name === "Mutilar")!;
-    expect(m.ranks.map((r) => r.spellId)).toEqual([1310707, 399956, 1241582, 1241584]);
+    expect(m.ranks.map((r) => r.spellId)).toEqual([399956, 1241582, 1241584]); // el 70755 deja Mutilar en 3 rangos (eran 4)
   });
 
   it("coste (energia), lanzamiento, enfriamiento, alcance y nivel coinciden con la referencia en los 119 hechizos que comparten", () => {
@@ -918,7 +937,7 @@ describe("habilidades del Pícaro (libro de hechizos del cliente)", () => {
       const lv = /Learned at level (\d+)/.exec(v.lv ?? "");
       if (lv && r.level !== Number(lv[1])) bad.push(`${key} nivel`);
     }
-    expect(compared).toBe(119);
+    expect(compared).toBe(118); // 119 hasta el 70707: Mutilar pierde un rango
     expect(bad).toEqual([]);
   });
 
@@ -938,8 +957,8 @@ describe("habilidades del Guerrero (libro de hechizos del cliente)", () => {
 
   it("cumple el esquema y trae las lineas de Armas, Furia y Proteccion", () => {
     expect(() => Abilities.parse(data)).not.toThrow();
-    expect(data.abilities).toHaveLength(50);
-    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(125);
+    expect(data.abilities).toHaveLength(51); // 50 hasta el 70707: entra Golpes temerarios
+    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(126); // 125 hasta el 70707: +Golpes temerarios
     expect(data.warnings).toEqual([]);
   });
 
@@ -983,7 +1002,7 @@ describe("habilidades del Paladin (libro de hechizos del cliente)", () => {
     expect(() => Abilities.parse(data)).not.toThrow();
     // 62 y 178 desde el 70707: Revocar, Salvación, Salvación en masa y las dos Bendiciones de luz dejan de enseñarse (SkillLineAbility quitadas) y entra Juramento de luz (de un talento); eran 66 y 184
     expect(data.abilities).toHaveLength(62);
-    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(178);
+    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(179); // 178 hasta el 70707: Escudo Sagrado gana el rango 4 (1239570)
   });
 
   it("los hechizos auxiliares (1 punto de Luz Sagrada, mitades de Choque Sagrado, debilitamientos de las Sentencias) no son rangos: los rangos por nombre cuadran con la referencia", () => {
@@ -1016,7 +1035,7 @@ describe("habilidades del Paladin (libro de hechizos del cliente)", () => {
       const lv = /Learned at level (\d+)/.exec(v.lv ?? "");
       if (lv && r.level !== Number(lv[1])) bad.push(`${key} nivel`);
     }
-    expect(compared).toBe(161); // 167 hasta el 70685: salen 5 habilidades del libro (ver arriba) y la referencia ya no las lista
+    expect(compared).toBe(162); // 167 hasta el 70685: salen 5 habilidades del libro (ver arriba) y la referencia ya no las lista
     // Furia justa: el hotfix del 23/10 la baja de nivel 16 a 10 (SpellLevels del cliente); la referencia externa lo trae igual desde su export del 30/10
     expect(bad).toEqual([]);
   });
@@ -1031,8 +1050,8 @@ describe("habilidades del Sacerdote (libro de hechizos del cliente)", () => {
 
   it("cumple el esquema y trae las lineas de Disciplina, Sagrado y Sombras", () => {
     expect(() => Abilities.parse(data)).not.toThrow();
-    expect(data.abilities).toHaveLength(75);
-    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(269);
+    expect(data.abilities).toHaveLength(74); // 75 hasta el 70707: el 70755 quita Sanación conjunta del libro (se conserva como «ya no se entrena»)
+    expect(data.abilities.reduce((n, a) => n + a.ranks.length, 0)).toBe(263); // 269 hasta el 70707: -6 rangos de Sanación conjunta
   });
 
   it("las habilidades de raza del Sacerdote van ligadas a su raza por las mascaras del cliente; Peste devoradora y Custodia de miedo son de todas", () => {
@@ -1092,7 +1111,7 @@ describe("habilidades del Sacerdote (libro de hechizos del cliente)", () => {
       const lv = /Learned at level (\d+)/.exec(v.lv ?? "");
       if (lv && r.level !== Number(lv[1])) bad.push(`${key} nivel`);
     }
-    expect(compared).toBe(238);
+    expect(compared).toBe(232); // 238 hasta el 70707: -6 rangos de Sanación conjunta
     expect(bad).toEqual([]);
   });
 });
@@ -1171,8 +1190,9 @@ describe("textos de los talentos del Sacerdote frente a la referencia", () => {
 describe("habilidades de Chaman, Cazador, Brujo y Druida frente a la referencia (coste, lanzamiento, enfriamiento, alcance y nivel)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const classes = [
-    { id: 7, token: "shaman", name: "Chaman", abilities: 66, ranks: 207, compared: 183 },
-    { id: 3, token: "hunter", name: "Cazador", abilities: 68, ranks: 171, compared: 145 },
+    // Cadena de relámpagos y Mareas vivas (rediseño del lanzamiento, notas del 3/11): el coste del cliente es mayor/menor que el de la referencia, que va por detrás
+    { id: 7, token: "shaman", name: "Chaman", abilities: 64, ranks: 200, compared: 179, behind: ["Shaman|Chain Lightning|Rank 1 coste", "Shaman|Chain Lightning|Rank 2 coste", "Shaman|Chain Lightning|Rank 3 coste", "Shaman|Chain Lightning|Rank 4 coste", "Shaman|Riptide|Rank 1 coste", "Shaman|Riptide|Rank 2 coste", "Shaman|Riptide|Rank 3 coste"] },
+    { id: 3, token: "hunter", name: "Cazador", abilities: 68, ranks: 171, compared: 145, behind: [] as string[] },
     { id: 9, token: "warlock", name: "Brujo", abilities: 66, ranks: 198, compared: 171 },
     { id: 11, token: "druid", name: "Druida", abilities: 69, ranks: 223, compared: 208 }, // 221 y 207 hasta el 70685: Lacerar y Mordedura feroz ganan rangos de entrenador
   ];
@@ -1203,7 +1223,7 @@ describe("habilidades de Chaman, Cazador, Brujo y Druida frente a la referencia 
         const lv = /Learned at level (\d+)/.exec(v.lv ?? "");
         if (lv && r.level !== Number(lv[1])) bad.push(`${key} nivel`);
       }
-      expect(bad).toEqual([]);
+      expect(bad).toEqual((c as { behind?: string[] }).behind ?? []);
       expect([data.abilities.length, data.abilities.reduce((n, a) => n + a.ranks.length, 0), compared]).toEqual([c.abilities, c.ranks, c.compared]);
     });
   }
@@ -1213,11 +1233,13 @@ describe("textos de los talentos de Chaman, Cazador, Brujo y Druida frente a la 
   const nums = (t: string | undefined) => [...(t ?? "").replace(/(\d),(\d{3})/g, "$1$2").replace(/(\d),(\d)/g, "$1.$2").matchAll(/\d+(?:\.\d+)?/g)].map((m) => Number(m[0])).sort((a, b) => a - b).join(",");
   // Diferencias esperadas: cifras que escalan con el nivel (valor base frente al del nivel 60 de la referencia) o formulas del texto sin resolver
   const CASES = [
-    { token: "SHAMAN", file: "shaman", total: 148, diff: ["Ráfaga de lava r1", "Mareas vivas r1"], notApprox: [] as string[] },
+    { token: "SHAMAN", file: "shaman", total: 145, diff: [] /* 70755: sin Ráfaga de lava (eliminada del árbol) y con Mareas vivas igual que la referencia */ as string[], notApprox: [] as string[] },
     // Aura de disparo certero r1: el 70658 bajó el poder de ataque a distancia de 30 a 15 (y Aspecto del halcón, Pies de plomo); la referencia ya lo trae desde su export del 29/10
-    { token: "HUNTER", file: "hunter", total: 148, diff: ["Contraataque r1"], notApprox: ["Contraataque r1"] },
+    { token: "HUNTER", file: "hunter", total: 148, diff: ["Disparo de francotirador r1", "Contraataque r1"], notApprox: ["Disparo de francotirador r1", "Contraataque r1"] },
+    // Disparo de francotirador r1: el hotfix del 3/11 dobla el daño (160 → 320 en el rango 1); la referencia (70753) aún trae la cifra anterior
     // Amplificar maldición r1 (hotfix del 16/10, Maldición de agotamiento 50 % → 20 %): la referencia ya lo trae desde su export del 27/10.
-    { token: "WARLOCK", file: "warlock", total: 146, diff: ["Quemadura de las Sombras r1", "Conflagrar r1", "Terror de caos r1", "Incinerar r1"], notApprox: ["Terror de caos r1"] },
+    // Arruinar r1: el 70755 sube su daño base (2,5 por nivel y doble coeficiente, notas del 3/11); la referencia aún trae la fórmula anterior
+    { token: "WARLOCK", file: "warlock", total: 146, diff: ["Arruinar r1", "Quemadura de las Sombras r1", "Conflagrar r1", "Terror de caos r1", "Incinerar r1"], notApprox: ["Terror de caos r1"] },
     { token: "DRUID", file: "druid", total: 147, diff: ["Carga feral r1", "Crecimiento salvaje r1"], notApprox: ["Carga feral r1"] },
   ];
   for (const c of CASES) {
@@ -1229,7 +1251,8 @@ describe("textos de los talentos de Chaman, Cazador, Brujo y Druida frente a la 
       const unflagged: string[] = [];
       tfTrees.forEach((tree, si) => {
         for (const t of tree.talents) {
-          const o = ours.specs[si]!.talents.find((x) => x.row === t.row - 1 && x.col === t.col - 1)!;
+          const o = ours.specs[si]!.talents.find((x) => x.row === t.row - 1 && x.col === t.col - 1);
+          if (!o) continue; // posición que la referencia ve distinta (ver «coincide en posiciones»)
           for (let r = 0; r < t.max; r++) {
             total++;
             if (nums(t.desc[r]) !== nums(o.descriptions[r])) {
@@ -1305,7 +1328,8 @@ describe("contraste de habilidades y Legacy con la referencia (lo que la referen
       const { abilities, report } = run(id, token);
       expect(abilities.abilities.every((a) => a.talentsForever !== null)).toBe(true);
       expect(report.listed + report.partial.length + report.notListed.length + report.retired.length).toBe(abilities.abilities.length);
-      expect(report.tfOnly, `${token}: hechizos de la referencia que no tenemos`).toEqual([]);
+      // Mutilar 1.º rango (1310707): el 70755 deja Mutilar en 3 rangos (notas del 3/11) y la referencia aún lista el cuarto
+      expect(report.tfOnly, `${token}: hechizos de la referencia que no tenemos`).toEqual(token === "rogue" ? ["Mutilate Rank 1"] : token === "priest" ? [1, 2, 3, 4, 5, 6].map((r) => `Binding Heal Rank ${r}`) : []); // Sanación conjunta: el 70755 la quita del libro (se conserva en retired-abilities.json) y la referencia aún la lista
     }
   });
 
@@ -1337,8 +1361,8 @@ describe("entradas de talento sin nodo frente a la referencia", () => {
   it("la mayoria tiene gemela en la referencia (mismas cifras); las que no, quedan listadas con su nombre", () => {
     const un = JSON.parse(readFileSync(join(root, "data", "forever", BUILD, "unassigned.json"), "utf8")) as { orphanEntries: { name: string | null; descriptions: string[] }[] };
     const oc = contrastOrphans(un.orphanEntries, join(root, "data", "external", "talentsforever"))!;
-    expect(oc.total).toBe(102); // 100 hasta el 70685; el 70707 retira Especialización en armas de una mano y Sello de furia mejorado
-    expect(oc.withTfTwin + oc.withoutTfTwin.length).toBe(102);
+    expect(oc.total).toBe(104); // 100 hasta el 70685; el 70707 retira Especialización en armas de una mano y Sello de furia mejorado
+    expect(oc.withTfTwin + oc.withoutTfTwin.length).toBe(104);
     expect(oc.withTfTwin).toBeGreaterThanOrEqual(60);
     // Las ventajas de Legacy sin colocar con otras cifras que las de la referencia (la referencia viene de un cliente mas antiguo)
     expect(oc.withoutTfTwin.map((o) => o.name)).toContain("Estudio dedicado");
@@ -1442,7 +1466,7 @@ describe("estadisticas por clase y nivel del cliente (PlayerExpectedStat y ChrCl
 });
 
 
-describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70707)", () => {
+describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70755)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
   const COND = /\uE000([sa]\d+(?:\|[sa]\d+)*)\uE001([^\uE001]*)\uE001([^\uE002]*)\uE002/;

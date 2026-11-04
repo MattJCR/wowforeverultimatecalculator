@@ -22,7 +22,7 @@ import {
 } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70707");
+const D = join(root, "data", "forever", "1.60.1.70755");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 const legacy = indexClass(ClassTalents.parse(json("legacy.json")));
 const warrior = indexClass(ClassTalents.parse(json("classes/warrior.json")));
@@ -135,8 +135,8 @@ describe("golpe de arma: mano izquierda, dos armas y «+N de daño»", () => {
   it("«+N de daño» del equipo se suma a cada golpe de arma, de cada mano", () => {
     const plain = powerEstimate(mutilate, ctx())!.weapon!;
     const bonus = powerEstimate(mutilate, ctx({ physicalDamage: 10 }))!.weapon!;
-    // 75 % de daño de arma: +10 en la derecha y +10 × 0,5 en la izquierda, todo × 0,75
-    expect(bonus.average - plain.average).toBeCloseTo(10 * 1.5 * 0.75, 5);
+    // 90 % de daño de arma (75 % hasta el 70707): +10 en la derecha y +10 × 0,5 en la izquierda, todo × 0,9
+    expect(bonus.average - plain.average).toBeCloseTo(10 * 1.5 * 0.9, 5);
     expect(bonus.formula).toContain("de daño del equipo");
   });
 

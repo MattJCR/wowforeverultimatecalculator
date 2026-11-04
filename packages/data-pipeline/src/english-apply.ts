@@ -101,10 +101,12 @@ export function applyOfficialEnglish(english: EnglishText, oe: OfficialEnglish, 
         report.ranks.total++;
         const id = rank.spellId;
         const have = english.spells[id];
-        const name = own.spellNames[id] ?? have?.name ?? oe.spells.name(id);
         const officialName = oe.spells.name(id);
-        if (have?.name && officialName && have.name !== officialName && !(officialName.startsWith(have.name + " ") && /^[IVX]+$/.test(officialName.slice(have.name.length + 1)))) {
-          report.nameDifferences.push(`${ability.name} (${id}): referencia «${have.name}», oficial «${officialName}»`);
+        // Si el nombre difiere del de la referencia (hechizo renombrado) manda el del cliente; los rangos romanos («Veneno mortal II») no cuentan
+        const renamed = !!(have?.name && officialName && have.name !== officialName && !(officialName.startsWith(have.name + " ") && /^[IVX]+$/.test(officialName.slice(have.name.length + 1))));
+        const name = own.spellNames[id] ?? (renamed ? officialName : have?.name) ?? officialName;
+        if (renamed) {
+          report.nameDifferences.push(`${ability.name} (${id}): referencia «${have!.name}», oficial «${officialName}»`);
         }
         const rendered = renderSpellEnglish(oe, id);
         if (!name) continue;
@@ -134,15 +136,18 @@ export function applyOfficialEnglish(english: EnglishText, oe: OfficialEnglish, 
         const en = english.talents[t.nodeId];
         const official = sp ? render(() => oe.trait.textForNode(sp)) : null;
         const ownTexts = own.talents[t.nodeId];
-        const name = own.talentNames[t.nodeId] ?? en?.name ?? oe.spells.name(t.spellId);
-        if (!name) continue;
         const officialName = oe.spells.name(t.spellId);
-        if (en?.name && officialName && en.name !== officialName) report.nameDifferences.push(`talento ${t.name} (nodo ${t.nodeId}): referencia «${en.name}», oficial «${officialName}»`);
+        // La referencia indexa por nodo y el cliente a veces intercambia definiciones entre nodos o renombra un talento: si el nombre difiere,
+        // manda el del cliente y el texto de la referencia (de otra definición) no se usa
+        const renamed = !!(en?.name && officialName && en.name !== officialName);
+        const name = own.talentNames[t.nodeId] ?? (renamed ? officialName : en?.name) ?? officialName;
+        if (!name) continue;
+        if (renamed) report.nameDifferences.push(`talento ${t.name} (nodo ${t.nodeId}): referencia «${en!.name}», oficial «${officialName}»`);
         report.talents.checked++;
         const descriptions: string[] = [];
         for (let i = 0; i < t.descriptions.length; i++) {
           const es = t.descriptions[i]!;
-          const refText = en?.descriptions.length ? en.descriptions[Math.min(i, en.descriptions.length - 1)] : undefined;
+          const refText = !renamed && en?.descriptions.length ? en.descriptions[Math.min(i, en.descriptions.length - 1)] : undefined;
           const chosen = choose(`talento ${t.name} (nodo ${t.nodeId}) rango ${i + 1}`, es, ownTexts?.[i], [refText, official && (official.descriptionsComplete || !t.descriptionsComplete) ? official.descriptions[i] : null]);
           descriptions.push(chosen?.text ?? "");
           if (chosen?.own) report.talents.own++;

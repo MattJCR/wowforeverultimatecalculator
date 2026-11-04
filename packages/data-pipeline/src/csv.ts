@@ -22,12 +22,15 @@ const HOTFIX_TEXT_COLUMNS: Record<string, string[]> = {
 /** Marcadores del cliente (`$m1`, `${$m1/2}`) de un texto, ordenados: dos textos con los mismos dicen lo mismo con otras palabras. */
 const markers = (text: string): string => (text.match(/\$\{[^}]*\}|\$[A-Za-z0-9<>@]+/g) ?? []).sort().join("|");
 
+/** Cifras escritas con dígitos, ordenadas («1,5» y «1.5» cuentan igual): dos textos con las mismas cifras dicen lo mismo con otras palabras. */
+const figures = (text: string): string => (text.match(/\d+(?:[.,]\d+)?/g) ?? []).map((n) => String(Number(n.replace(",", ".")))).sort().join("|");
+
 /**
  * Los hotfixes del servidor repiten a veces un hechizo con su texto en inglés aunque el cliente ya trae su traducción
  * (parche 70658: 24 descripciones y 8 nombres). Si el volcado es `<build>-hotfix` y existen `<build>` (estático) y
  * `<build>-hotfix-enUS`, un texto del hotfix IGUAL al inglés y distinto del estático se sustituye por el del estático
- * cuando los dos llevan los mismos marcadores. Lo que el hotfix cambia de verdad (otro marcador, otro nombre en español)
- * se queda como está.
+ * cuando los dos llevan los mismos marcadores Y las mismas cifras. Lo que el hotfix cambia de verdad (otro marcador, otras
+ * cifras escritas a mano —Mordedura feroz del 70755: 50-66 → 62-82—, otro nombre en español) se queda como está.
  */
 function staticTextWhereHotfixIsUntranslated(dir: string, name: string, rows: Row[]): number {
   const columns = HOTFIX_TEXT_COLUMNS[name];
@@ -45,7 +48,7 @@ function staticTextWhereHotfixIsUntranslated(dir: string, name: string, rows: Ro
     if (!base || !en) continue;
     for (const c of columns) {
       const staticText = base[c] ?? "";
-      if (staticText && row[c] && row[c] === en[c] && row[c] !== staticText && markers(row[c]!) === markers(staticText)) {
+      if (staticText && row[c] && row[c] === en[c] && row[c] !== staticText && markers(row[c]!) === markers(staticText) && figures(row[c]!) === figures(staticText)) {
         row[c] = staticText;
         changed++;
       }

@@ -6,15 +6,17 @@ import { describe, expect, it } from "vitest";
 import { collectStatEffects, effectAt, findAbility, indexClass, ruleLines, type Build } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70707");
+const D = join(root, "data", "forever", "1.60.1.70755");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 
 /** Chamán, Cazador, Brujo y Druida: reglas válidas, ningún talento escogido se pierde y las cifras directas coinciden con la referencia. */
 const CLASSES = [
-  { token: "shaman", name: "Chamán", rules: 8, pairs: 72, ok: 62 },
+  // 70755: los buffs del lanzamiento (notas de Blizzard del 3/11: Descarga de relámpagos, Cadena de relámpagos, Choques) y el árbol rediseñado; la referencia (70753) trae las cifras anteriores
+  { token: "shaman", name: "Chamán", rules: 8, pairs: 65, ok: 31 },
   { token: "hunter", name: "Cazador", rules: 7, pairs: 3, ok: 3 },
   { token: "warlock", name: "Brujo", rules: 6, pairs: 33, ok: 33 },
-  { token: "druid", name: "Druida", rules: 4, pairs: 45, ok: 45 },
+  // 70755: Fuego estelar +40 %, Destripar, Rasgadura, Mordedura feroz y Lanzarse +25 % (notas del 3/11); la referencia trae las cifras anteriores
+  { token: "druid", name: "Druida", rules: 4, pairs: 45, ok: 38 },
 ] as const;
 
 for (const c of CLASSES) {

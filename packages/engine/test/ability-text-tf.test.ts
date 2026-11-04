@@ -15,7 +15,7 @@ const nums = (s: string) => [...s.replace(/\n/g, " ").replace(/(\d),(\d{3})/g, "
 const close = (a: number, b: number) => Math.abs(a - b) <= Math.max(1, Math.abs(b) * 0.005);
 
 function load(c: string) {
-  const ab = Abilities.parse(JSON.parse(readFileSync(join(root, `data/forever/1.60.1.70707/abilities/${c}.json`), "utf8")));
+  const ab = Abilities.parse(JSON.parse(readFileSync(join(root, `data/forever/1.60.1.70755/abilities/${c}.json`), "utf8")));
   const tf = JSON.parse(readFileSync(join(root, `data/external/talentsforever/${c}.json`), "utf8")).spell_desc as Record<string, { id?: number; d?: string }>;
   const by = new Map<number, { name: string; rank: (typeof ab.abilities)[number]["ranks"][number] }>();
   for (const a of ab.abilities) for (const r of a.ranks) by.set(r.spellId, { name: a.name, rank: r });
@@ -33,7 +33,10 @@ describe("textos de las habilidades frente a la referencia (nivel 60, sin talent
   // 70707: Paladín 161 de 167 (salen 5 habilidades del libro y entra Juramento de luz, que la referencia no lista) y 25 distintas (24 antes: Escudo Sagrado, Vigilia de la Luz y Furia justa
   // cambian por hotfix y la referencia declara el build 70630); Druida 208 (Lacerar y Mordedura feroz ganan rangos de entrenador)
   const EXPECTED: Record<string, [number, number]> = {
-    warrior: [116, 110], paladin: [161, 136], rogue: [119, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 110], shaman: [183, 182], warlock: [171, 166], druid: [208, 195],
+    // 70755 (la referencia declara el 70753): cambios del lanzamiento que aún no trae (notas de Blizzard del 3/11 y hotfix del Cazador): Guerrero 108 (Embate 15 s, Lanzazo 75 %), Paladín 162 (Escudo Sagrado rango 4),
+    // Pícaro 118 (Mutilar pierde un rango; venenos y Hemorragia cambian), Cazador 93 (Tiro de puntería, Tiro Arcano, Aguijón de serpiente, Aspecto del halcón, Aura de disparo certero, Disparo de francotirador),
+    // Chamán 149 de 179 (Descarga de relámpagos, Choque de tierra/llamas/Escarcha, Cadena de relámpagos, Mareas vivas, Golpe de tormenta) y Druida 165 (Destripar, Fuego estelar, Triturar, Zarpa, Arañazo, Mordedura feroz, Devastar, Lanzarse)
+    warrior: [116, 108], paladin: [162, 137], rogue: [118, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 93], shaman: [179, 149], warlock: [171, 166], druid: [208, 165],
   };
   for (const c of CLASSES) {
     it(`${c}: ${EXPECTED[c]![1]} de ${EXPECTED[c]![0]} textos con las mismas cifras`, () => {
@@ -97,9 +100,9 @@ describe("diferencias conocidas con la referencia", () => {
     expect(textOf(byWar.get(tfWar["Warrior|Battle Shout|Rank 1"]!.id!)!.rank)).toContain("12 p."); // base 9
   });
 
-  it("el total periódico usa la duración del hechizo que lleva el efecto: Lanzarse sangra 90 en 18 s aunque aturda 2 s (antes 10)", () => {
+  it("el total periódico usa la duración del hechizo que lleva el efecto: Lanzarse sangra 114 en 18 s (90 antes del 70755) aunque aturda 2 s (antes 10)", () => {
     const { tf, by } = load("druid");
     const pounce = by.get(tf["Druid|Pounce|Rank 1"]!.id!)!;
-    expect(textOf(pounce.rank)).toContain("90 p. de daño durante 18 s");
+    expect(textOf(pounce.rank)).toContain("114 p. de daño durante 18 s");
   });
 });

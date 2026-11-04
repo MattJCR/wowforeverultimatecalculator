@@ -1,25 +1,36 @@
 {
-  "build": "1.60.1.70707",
-  "tablesBuild": "1.60.1.70707",
+  "build": "1.60.1.70755",
+  "tablesBuild": "1.60.1.70755",
   "ranks": {
-    "total": 1733,
-    "templated": 1715,
-    "named": 1733,
-    "filledByOfficial": 186,
-    "own": 10
+    "total": 1740,
+    "templated": 1727,
+    "named": 1740,
+    "filledByOfficial": 189,
+    "own": 4
   },
-  "nameDifferences": [],
+  "nameDifferences": [
+    "talento Golpes temerarios (nodo 113636): referencia «Raging Blows», oficial «Reckless Swings»",
+    "talento Aluvión (nodo 105928): referencia «Improved Whirlwind», oficial «Flurry»",
+    "talento Experiencia con armas (nodo 105726): referencia «Aggression», oficial «Weapon Expertise»",
+    "talento Agresión (nodo 105730): referencia «Weapon Expertise», oficial «Aggression»",
+    "talento Trabajos sucios (nodo 105745): referencia «Camouflage», oficial «Dirty Deeds»",
+    "talento Camuflaje (nodo 105756): referencia «Dirty Deeds», oficial «Camouflage»",
+    "talento Emboscada mejorada (nodo 105749): referencia «Dirty Tricks», oficial «Improved Ambush»",
+    "talento Jugarretas (nodo 105757): referencia «Improved Ambush», oficial «Dirty Tricks»",
+    "talento Elusión (nodo 105753): referencia «Ghostly Strike», oficial «Elusiveness»",
+    "talento Golpe fantasmal (nodo 105754): referencia «Elusiveness», oficial «Ghostly Strike»"
+  ],
   "pending": [],
   "ownMismatches": [],
   "talents": {
-    "checked": 492,
-    "official": 29,
-    "reference": 1342,
+    "checked": 494,
+    "official": 63,
+    "reference": 1301,
     "own": 8
   },
   "unassigned": {
-    "entries": 102,
-    "entriesNamed": 93,
+    "entries": 104,
+    "entriesNamed": 92,
     "nodes": 62,
     "nodesNamed": 58
   },

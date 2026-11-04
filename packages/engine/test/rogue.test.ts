@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { addPoint, applyModifiers, collectStatEffects, findAbility, indexClass, ruleAbilityDetail, ruleAppliesTo, ruleLines, spellModifiersOf, type Build } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70707");
+const D = join(root, "data", "forever", "1.60.1.70755");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 const rogue = indexClass(ClassTalents.parse(json("classes/rogue.json")));
 const legacy = indexClass(ClassTalents.parse(json("legacy.json")));
@@ -15,7 +15,7 @@ const rules = TalentRules.parse(json("rules/rogue.json"));
 const human = Races.parse(json("races.json")).races.find((r) => r.id === 1)!;
 
 /** Talentos de las filas altas de Asesinato que sirven de relleno para cumplir los requisitos de fila. */
-const FILLERS = ["Maldad", "Incapacitación mejorada", "Ataques implacables", "Crueldad", "Asesinar", "Hacer picadillo mejorado", "Letalidad"];
+const FILLERS = ["Maldad", "Incapacitación mejorada", "Ataques implacables", "Crueldad", "Hacer picadillo mejorado", "Letalidad"]; // 70755: Asesinar (Murder) sale del árbol
 
 /** Build legal: se gastan puntos con las reglas del motor (requisitos de fila y prerrequisitos) hasta el rango maximo de cada talento pedido. */
 function build(...names: string[]): Build {
@@ -31,16 +31,13 @@ describe("Pícaro: habilidades, talentos y reglas", () => {
   it("el build de prueba es legal y trae los talentos pedidos", () => {
     expect(rankIn(b, "Vigor")).toBe(2);
     expect(rankIn(b, "Crueldad")).toBeGreaterThan(0);
-    expect(rankIn(b, "Asesinar")).toBe(2);
   });
 
-  it("Vigor suma +10 de energia máxima y Asesinar +4 % de daño contra humanoides y gigantes", () => {
+  it("Vigor suma +10 de energia máxima (Asesinar, +4 % de daño contra humanoides y gigantes, sale del árbol en el 70755)", () => {
     const fx = collectStatEffects({ cls: rogue, classBuild: b, legacy, legacyBuild: {}, race: human, abilities, rules });
     const energy = fx.totals.find((t) => t.label === "energía máximo");
     expect(energy).toMatchObject({ value: 10, unit: "puntos", scope: null });
-    const kill = fx.totals.find((t) => t.label === "daño infligido" && t.scope?.[0]?.startsWith("contra"))!;
-    expect(kill.value).toBe(4);
-    expect(kill.scope![0]).toBe("contra gigantes y humanoides");
+    expect(fx.totals.find((t) => t.label === "daño infligido" && t.scope?.[0]?.startsWith("contra"))).toBeUndefined();
   });
 
   it("Crueldad (reglas) afecta a los remates y a ninguna otra habilidad", () => {

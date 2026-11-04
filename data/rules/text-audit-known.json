@@ -31,6 +31,11 @@
     { "problem": "marcador del cliente sin resolver", "where": "conjunto 1716 Determinación de furia terrenal: bono de 2", "reason": "Cita el hechizo 16280, que el cliente no trae." },
     { "problem": "marcador del cliente sin resolver", "where": "conjunto 1822 Cólera inamovible: bono de 4", "reason": "Cita el hechizo 12970 (Aluvión), que el cliente no trae." },
     { "problem": "marcador del cliente sin resolver", "where": "conjunto 1897 Vestimentas de Pirofrío: bono de 2", "reason": "La sanación depende del poder con hechizos del personaje (`$SPA`)." },
-    { "problem": "marcador del cliente sin resolver", "where": "conjunto 1955 Gloria deshonrosa: bono de 2", "reason": "Cita hechizos (1231491, 1231492) que el cliente no trae y condicionales `?s` sin resolver." }
+    { "problem": "marcador del cliente sin resolver", "where": "conjunto 1955 Gloria deshonrosa: bono de 2", "reason": "Cita hechizos (1231491, 1231492) que el cliente no trae y condicionales `?s` sin resolver." },
+    { "problem": "marcador del cliente sin resolver", "where": "Pícaro: talento Marca de muerte r1", "reason": "El límite de daño suma el poder de ataque (`$<maxAP>*$apm`), el crítico (`$mcrit`) y Golpe de gracia (`$<coup>`, según lo aprendido): el motor no lo cuantifica y el texto enseña la fórmula sin resolver." },
+    { "problem": "cifras distintas ES/EN", "where": "Pícaro: talento Marca de muerte r1", "reason": "Mismo hueco: la fórmula sin resolver cuenta como cifras en el español." },
+    { "problem": "marcador del cliente sin resolver", "where": "clase 4: habilidad Marca de muerte r1", "reason": "El límite de daño suma el poder de ataque (`$<maxAP>*$apm`), el crítico (`$mcrit`) y Golpe de gracia (`$<coup>`, según lo aprendido): el motor no lo cuantifica y el texto enseña la fórmula sin resolver." },
+    { "problem": "marcador del cliente sin resolver", "wherePrefix": "clase 4: habilidad Marca de la muerte r", "reason": "El límite de daño suma el poder de ataque (`$<maxAP>*$apm`), el crítico (`$mcrit`) y Golpe de gracia (`$<coup>`, según lo aprendido): el motor no lo cuantifica y el texto enseña la fórmula sin resolver." },
+    { "problem": "cifras distintas ES/EN", "wherePrefix": "Guerrero: talento Voz retumbante r", "reason": "El español del cliente resume en «tus Gritos y Aullidos» lo que el inglés dice en dos frases (Gritos, y además Aullido penetrante): misma cifra, repetida en el inglés." }
   ]
 }

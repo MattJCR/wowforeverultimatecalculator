@@ -15,7 +15,7 @@ import { activatableTalents, allModifiersFor, applyModifiers, canCrit, collectSt
  * Cada lista de abajo es EXACTA: si cambia (para bien o para mal) la prueba falla y obliga a revisarla.
  */
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70707");
+const D = join(root, "data", "forever", "1.60.1.70755");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 const classes = readdirSync(join(D, "classes")).map((f) => {
   const token = f.replace(".json", "");
@@ -37,6 +37,8 @@ const textOf = (c: (typeof classes)[number], talent: string, ability: string): {
 describe("la mejora de un talento se ve en la descripción de la habilidad (las 9 clases)", () => {
   // Combinaciones talento → habilidad (daño/sanación, nivel 60, talento al máximo) cuyo texto NO cambia, con el motivo
   const UNCHANGED: Record<string, string> = {
+    "rogue: Golpe de gracia → Marca de muerte": "el límite de daño del hechizo lleva `$<coup>` (condicional «si conoces Golpe de gracia») dentro de una fórmula sin resolver: el texto no enseña la cifra",
+    "rogue: Golpe de gracia → Marca de la muerte": "idem (Marca de la muerte es la versión de Forever de Marca de muerte)",
     "druid: Génesis → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
     "druid: Regalo de la Naturaleza → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
     "druid: Regalo de la Naturaleza → Tranquilidad": "la máscara de sanación directa (operación 0) la cruza pero Tranquilidad es periódica y la de sanación periódica (22) no la incluye, como en Classic",
@@ -86,11 +88,12 @@ describe("la mejora de un talento se ve en la descripción de la habilidad (las 
 
   it("«X % de daño de arma»: el % de los talentos se aplica una sola vez (Puñalada y Mutilar)", () => {
     expect(textOf(rogue, "Oportunidad", "Puñalada").base).toContain("150% de daño de arma más 150");
-    expect(textOf(rogue, "Oportunidad", "Puñalada").mod).toContain("165% de daño de arma más 165");
+    // Oportunidad: 5 rangos de 4 a 20 % desde el 70755 (antes 2 rangos, 5 y 10 %)
+    expect(textOf(rogue, "Oportunidad", "Puñalada").mod).toContain("180% de daño de arma más 180");
     const mutilar = textOf(rogue, "Oportunidad", "Mutilar");
-    expect(mutilar.base).toContain("75% de daño de arma más 50,25 p.");
-    // 50,25 x 1,1 = 55,28 (no 60,8: el 10 % no se aplica al porcentaje y al daño plano a la vez)
-    expect(mutilar.mod).toContain("82,5% de daño de arma más 55,28 p.");
+    expect(mutilar.base).toContain("90% de daño de arma más 79,2 p.");
+    // 79,2 x 1,2 = 95,04 (el 20 % no se aplica al porcentaje y al daño plano a la vez)
+    expect(mutilar.mod).toContain("108% de daño de arma más 95,04 p.");
   });
 
   it("Mutilar recibe los talentos pasivos que la nombran (Sangre fría es activo y no suma de forma permanente) porque su daño vive en un hechizo con la máscara que ellos usan", () => {
@@ -160,15 +163,14 @@ describe("habilidades que el texto de un talento nombra y su máscara (propia o 
     "paladin: Furia justa mejorada → Furia recta": "ruido: Furia recta es la condición («mientras está activa»)",
     "paladin: Credo férreo → Furia recta": "ruido: idem",
     "paladin: Juramento de escudo → Escudo Sagrado": "ruido: el texto describe que Golpe Sagrado activa Escudo Sagrado y Especialización en escudos (mecánica); la cifra que modifica el talento (−4 s de Golpe Sagrado) sí llega a Golpe Sagrado por máscara",
+    // 70755: Veneno pasa a ser un talento pasivo (aura 4, sin máscara de modificador) y Distraer mejorado sale del árbol: sus entradas de aquí ya no aplican
+    "shaman: Maestría de Relámpago → Maestría de Relámpago": "ruido: el talento se llama así",
     "rogue: Venenos inmundos → Veneno": "ruido: palabra genérica (los venenos concretos sí están cubiertos)",
     "rogue: Venenos inmundos → Venenos": "ruido: palabra genérica",
     "rogue: Venenos mejorados → Veneno": "ruido: palabra genérica",
     "rogue: Venenos mejorados → Venenos": "ruido: palabra genérica",
     "rogue: Golpe a los riñones mejorado → Veneno": "ruido: palabra genérica",
     "rogue: Golpe a los riñones mejorado → Venenos": "ruido: palabra genérica",
-    "rogue: Veneno → Veneno": "ruido: el talento se llama así",
-    "rogue: Veneno → Venenos": "ruido: palabra genérica",
-    "rogue: Distraer mejorado → Sigilo": "ruido: «detección de sigilo», no la habilidad Sigilo",
     "priest: Forma de las Sombras → Forma de las Sombras": "ruido: el talento se llama así",
     "mage: Nova de Escarcha mejorada → Regeneración": "ruido: palabra genérica",
     "warlock: Cauce de salud mejorado → Amenaza": "ruido: palabra genérica",
@@ -314,7 +316,7 @@ describe("cargas, radio y duración de hechizos citados (operaciones 4, 6 y 1)",
     expect(t.mod).toContain("hasta que se hayan usado 32 cargas");
   });
 
-  it("el radio de las habilidades de área viene del cliente y lo modifican los talentos (Alcance ártico +20 %, Distraer mejorado +5 m)", () => {
+  it("el radio de las habilidades de área viene del cliente y lo modifican los talentos (Alcance ártico +20 %; Distraer mejorado salió del árbol en el 70755)", () => {
     const radius = (c: string, talent: string, ability: string) => {
       const k = byToken(c);
       const r = rankAtLevel(findAbility(k.abilities, ability)!, 60)!;
@@ -322,7 +324,7 @@ describe("cargas, radio y duración de hechizos citados (operaciones 4, 6 y 1)",
     };
     expect(radius("mage", "Alcance ártico", "Nova de Escarcha")).toEqual({ base: 10, mod: 12 });
     expect(radius("mage", "Alcance ártico", "Cono de frío")).toEqual({ base: 10, mod: 12 });
-    expect(radius("rogue", "Distraer mejorado", "Distraer")).toEqual({ base: 10, mod: 15 });
+    // Distraer mejorado (+5 m al radio de Distraer) sale del árbol del Pícaro en el 70755
   });
 
   it("la duración de un hechizo citado por el texto se modifica con la máscara de ESE hechizo (Trampas inteligentes → placa de hielo)", () => {

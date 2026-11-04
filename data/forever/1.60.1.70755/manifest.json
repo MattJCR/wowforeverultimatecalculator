@@ -1,0 +1,600 @@
+{
+  "schemaVersion": 1,
+  "build": "1.60.1.70755",
+  "locale": "esES",
+  "generatedAt": "2026-11-04T08:46:21.881Z",
+  "hotfixesApplied": true,
+  "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
+  "classes": [
+    {
+      "classId": 1,
+      "className": "Guerrero",
+      "iconFileDataId": 626008,
+      "traitTreeId": 1117,
+      "talentCount": 53,
+      "specNames": [
+        "Armas",
+        "Furia",
+        "Protección"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/warrior.json",
+      "sha256": "36323c9819adb75644c455dc3f470fed20bfc7f3891b20fc236a5beab37c593c",
+      "warnings": 0
+    },
+    {
+      "classId": 2,
+      "className": "Paladín",
+      "iconFileDataId": 626003,
+      "traitTreeId": 1100,
+      "talentCount": 51,
+      "specNames": [
+        "Sagrado",
+        "Protección",
+        "Reprensión"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/paladin.json",
+      "sha256": "6d3977430404f02e2c2b3ed3f14247082487b94258cd61c58c7a3bd827c3b207",
+      "warnings": 0
+    },
+    {
+      "classId": 3,
+      "className": "Cazador",
+      "iconFileDataId": 626000,
+      "traitTreeId": 1091,
+      "talentCount": 50,
+      "specNames": [
+        "Dominio de bestias",
+        "Puntería",
+        "Supervivencia"
+      ],
+      "inactiveCount": 2,
+      "file": "classes/hunter.json",
+      "sha256": "ad2377aaebe5d5aeb6c5a3faf1d5e678e5f615c28d5bfd5c01c196ca6029d8f0",
+      "warnings": 2
+    },
+    {
+      "classId": 4,
+      "className": "Pícaro",
+      "iconFileDataId": 626005,
+      "traitTreeId": 1111,
+      "talentCount": 54,
+      "specNames": [
+        "Asesinato",
+        "Combate",
+        "Sutileza"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/rogue.json",
+      "sha256": "68d47d2a5852872cd7b292d3e54292f471f8114524986233779300751a623b52",
+      "warnings": 0
+    },
+    {
+      "classId": 5,
+      "className": "Sacerdote",
+      "iconFileDataId": 626004,
+      "traitTreeId": 1114,
+      "talentCount": 52,
+      "specNames": [
+        "Disciplina",
+        "Sagrado",
+        "Sombra"
+      ],
+      "inactiveCount": 1,
+      "file": "classes/priest.json",
+      "sha256": "a689bb6c8d6e504f423e7bac47a264469b82ab9d8e906a66d142f936324254ef",
+      "warnings": 1
+    },
+    {
+      "classId": 7,
+      "className": "Chamán",
+      "iconFileDataId": 626006,
+      "traitTreeId": 1082,
+      "talentCount": 50,
+      "specNames": [
+        "Elemental",
+        "Mejora",
+        "Recuperación"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/shaman.json",
+      "sha256": "6cbfe8f086551d47db0c24a70682ac4c123b2065fa14f53c1a938f3359d4f48f",
+      "warnings": 0
+    },
+    {
+      "classId": 8,
+      "className": "Mago",
+      "iconFileDataId": 626001,
+      "traitTreeId": 1112,
+      "talentCount": 53,
+      "specNames": [
+        "Arcano",
+        "Fuego",
+        "Escarcha"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/mage.json",
+      "sha256": "11d7e7613d5ba48173deb0712fec469c9b0ef7ec95367936267bb3bb37ef1ce1",
+      "warnings": 0
+    },
+    {
+      "classId": 9,
+      "className": "Brujo",
+      "iconFileDataId": 626007,
+      "traitTreeId": 1116,
+      "talentCount": 52,
+      "specNames": [
+        "Aflicción",
+        "Demonología",
+        "Destrucción"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/warlock.json",
+      "sha256": "c45758cf3fa13d2df9ee5b7848f02c53409f46e31381f16b9132fe58bca53894",
+      "warnings": 1
+    },
+    {
+      "classId": 11,
+      "className": "Druida",
+      "iconFileDataId": 625999,
+      "traitTreeId": 1089,
+      "talentCount": 52,
+      "specNames": [
+        "Equilibrio",
+        "Combate feral",
+        "Recuperación"
+      ],
+      "inactiveCount": 0,
+      "file": "classes/druid.json",
+      "sha256": "6191cb2454045466cb3df485cd806d3d85910da0a81056e76e1c5480e1c55007",
+      "warnings": 0
+    }
+  ],
+  "legacy": {
+    "file": "legacy.json",
+    "sha256": "9d8f58b2c695a07ca08e3c03d2a4ecc7d27e0e4d158c97368483e70edc86680c",
+    "talentCount": 27,
+    "unplacedEntries": 30
+  },
+  "combatFormulas": {
+    "file": "combat-formulas.json",
+    "sha256": "c30fb940b87c34e66747931c0ab0740e7577a8129d712a20a441928b736e6ef2"
+  },
+  "rules": [
+    {
+      "classId": 1,
+      "file": "rules/warrior.json",
+      "sha256": "113a4e59e5ee96b14f223227d8a80c317e22714aabceb09d4f883efd8c337067",
+      "ruleCount": 9
+    },
+    {
+      "classId": 2,
+      "file": "rules/paladin.json",
+      "sha256": "8d697e8278aa23a219d2cb2fefa48a23665e92563340de43e16b9732ef7a0c66",
+      "ruleCount": 6
+    },
+    {
+      "classId": 3,
+      "file": "rules/hunter.json",
+      "sha256": "03f78f67d3134c1cad44a832d6d51fb2d13b4131691c9d4f2e0638d35b17f6d1",
+      "ruleCount": 7
+    },
+    {
+      "classId": 4,
+      "file": "rules/rogue.json",
+      "sha256": "86460d68f8f62adde92a3465809814e0752af92e6a6c9094003240d35dfd4ca0",
+      "ruleCount": 13
+    },
+    {
+      "classId": 5,
+      "file": "rules/priest.json",
+      "sha256": "4852551dba5c7402343f8c96a561fea28138cbc74f1a2cf5173df8acd27667ec",
+      "ruleCount": 10
+    },
+    {
+      "classId": 7,
+      "file": "rules/shaman.json",
+      "sha256": "5cd75475caef5e779e3d86925fe7595ba5339cedc47da0d536262b5c5ec7867b",
+      "ruleCount": 8
+    },
+    {
+      "classId": 8,
+      "file": "rules/mage.json",
+      "sha256": "9c74d2b2489dadf638ff2bd166bdf08f0ad3fe1232e11ed08ff9d61ba554355c",
+      "ruleCount": 17
+    },
+    {
+      "classId": 9,
+      "file": "rules/warlock.json",
+      "sha256": "b2d5346eb9afb81fac7a27dd47b083d1311313613dca788eb5610107fc2d50a4",
+      "ruleCount": 6
+    },
+    {
+      "classId": 11,
+      "file": "rules/druid.json",
+      "sha256": "2a995d87aa6c40da003514eaa660bc2582480be93cca3f2f83013d87b71b3722",
+      "ruleCount": 4
+    }
+  ],
+  "abilities": [
+    {
+      "classId": 1,
+      "file": "abilities/warrior.json",
+      "sha256": "99bee7b0831c6d7eb970c4839a1443a003b62719b5e0e0f0cb76abfcb55a8b68",
+      "abilityCount": 51,
+      "rankCount": 126
+    },
+    {
+      "classId": 2,
+      "file": "abilities/paladin.json",
+      "sha256": "2ce729dc7aa9b1ef145b2eec6c5a2570a176b0f846ca3b5e4ece97035acbe7e7",
+      "abilityCount": 67,
+      "rankCount": 186
+    },
+    {
+      "classId": 3,
+      "file": "abilities/hunter.json",
+      "sha256": "de66e7828abd81cadeb09d4155ad46a33994e0202ccfe398f6ce36ef19e55008",
+      "abilityCount": 68,
+      "rankCount": 171
+    },
+    {
+      "classId": 4,
+      "file": "abilities/rogue.json",
+      "sha256": "fce6fb9fd18011abe3aa3753dee41e7f091d8422d162b581df2c6fab5ee068ee",
+      "abilityCount": 56,
+      "rankCount": 140
+    },
+    {
+      "classId": 5,
+      "file": "abilities/priest.json",
+      "sha256": "c3683cbca8a5207924220be9620c101de900095d526282b41e05540694e35477",
+      "abilityCount": 75,
+      "rankCount": 269
+    },
+    {
+      "classId": 7,
+      "file": "abilities/shaman.json",
+      "sha256": "f217a482fd2be6ad214cf2d09a7603df09cae1cfe5bd5773f155d07a80e0c317",
+      "abilityCount": 66,
+      "rankCount": 207
+    },
+    {
+      "classId": 8,
+      "file": "abilities/mage.json",
+      "sha256": "1c449eb70b1707b42ba03e369f233bde7674235656293c9cd774501387b859a0",
+      "abilityCount": 72,
+      "rankCount": 220
+    },
+    {
+      "classId": 9,
+      "file": "abilities/warlock.json",
+      "sha256": "303fa6ebecd6f0ad1bee0a802d9cd9b692704ff2f0b0c6256d0b003981c204ef",
+      "abilityCount": 66,
+      "rankCount": 198
+    },
+    {
+      "classId": 11,
+      "file": "abilities/druid.json",
+      "sha256": "2a768fee67f133461cd3e69d7a2f9fa37ecc39f728e2608a943829a310392602",
+      "abilityCount": 69,
+      "rankCount": 223
+    }
+  ],
+  "clientStats": {
+    "file": "client-stats.json",
+    "sha256": "3100c83b1c7068ca62c7a5ef6eb2316215e48b65d0dc40a3fb379049a5f19a35"
+  },
+  "combatRatings": {
+    "file": "combat-ratings.json",
+    "sha256": "256738246a70e1450fb24513d699289a33387f42664a4ada04039a3cd446c48b"
+  },
+  "enchants": {
+    "file": "enchants.json",
+    "sha256": "427cae60fa7f1769d286e3809abe413ac055eb3d6d84675db55ed343d3107e2d",
+    "count": 246
+  },
+  "weaponEnhancements": {
+    "file": "weapon-enhancements.json",
+    "sha256": "4030609d1738f1ad4dd214791d755c324395eb97fc713dd6af1087643fb18f9f",
+    "count": 85
+  },
+  "itemSources": {
+    "file": "sources.json",
+    "sha256": "c5b533da3a9fc99364263f2a6c053dee2cc5a88b66463427e3606dbfe3e2f7fe",
+    "count": 1370
+  },
+  "buffs": {
+    "file": "buffs.json",
+    "sha256": "c3f3d0e35b68aed032aaee57684fb3778d718ce5eee51aa7bfdc90d44c5bfbfd",
+    "count": 311
+  },
+  "randomSuffixes": {
+    "file": "random-suffixes.json",
+    "sha256": "9902f0d0212df00a1b3f08ca48dffddfcebaa9f75fba713fc101578221fc7596",
+    "count": 160
+  },
+  "items": {
+    "file": "items.json",
+    "sha256": "9d0f2ad59abe2757f1d96af3d4dafe3d8a0b3f92bc4bfdeb572a7f1d1da3111f",
+    "itemCount": 12633,
+    "unavailableCount": 6372
+  },
+  "equipRules": {
+    "file": "equip-rules.json",
+    "sha256": "687099d7283c73e684e7e71189e415e1df29961f644405f1e67b830cb3ca7532"
+  },
+  "stats": {
+    "file": "stats.json",
+    "sha256": "f697af311ff36299f61b507ce17e3cfeb61bc07094c058aab173beffb68b44c3",
+    "comboCount": 56,
+    "missingCount": 0
+  },
+  "races": {
+    "file": "races.json",
+    "sha256": "32dd29c27f045d2bf996a00eddac8e37e4d2eca5c541f9e333a516feb322ab27",
+    "raceCount": 10
+  },
+  "icons": {
+    "file": "icons.json",
+    "count": 1980,
+    "sha256": "ca466d6875a90e60fc846b83938c19e9c9b409af2bb4a7689cfb5eebc4b3da10"
+  },
+  "english": {
+    "file": "i18n/en.json",
+    "sha256": "0bf0407ca9ad439bee7a52b4f41b76ccf8822aaa7b02a1ecd444f0f997146d8d"
+  },
+  "unassigned": {
+    "file": "unassigned.json",
+    "sha256": "6aff171ead560be9d3d8fc7375b88221d2157aeed5db65fb42a5ca7e3b4ad0a3",
+    "orphanEntries": 104,
+    "alternativeTrees": 4
+  },
+  "unresolvedTrees": [
+    {
+      "traitTreeId": 1066,
+      "nodeCount": 1,
+      "reason": "arbol demasiado pequeno para ser de clase (< 30 nodos)"
+    },
+    {
+      "traitTreeId": 1083,
+      "nodeCount": 35,
+      "reason": "alternativa descartada para Druida: el arbol 1089 es mas completo (52 talentos)"
+    }
+  ],
+  "inputs": [
+    {
+      "table": "ArmorLocation",
+      "sha256": "522620c34f43048642ba1b3cc8e056b04ac35c8634f28f76bb5b702cb849d180"
+    },
+    {
+      "table": "CharBaseInfo",
+      "sha256": "cdb85d024a429cfd3ba83373acc4d43751cbe9d6b5d4d1dd8f7059c3a010bba4"
+    },
+    {
+      "table": "ChrClasses",
+      "sha256": "96423c348059a3a8791857a449a0382a66de13e77cd11fb1c8a147c8fd9ee8cc"
+    },
+    {
+      "table": "ChrRaceRacialAbility",
+      "sha256": "c82180d5ef6df131a37978b46a48af48f105a26929d17692f969411af6b10083"
+    },
+    {
+      "table": "ChrRaces",
+      "sha256": "55e47830ceda63f35c1d0ff6664f5dea4779f66b157cd49d7a4dcc9a061d0668"
+    },
+    {
+      "table": "CurvePoint",
+      "sha256": "9c8dc89a77009c8456c1999e1d14eb4826ed5010cd30ebcc0e51b9ae5001f922"
+    },
+    {
+      "table": "Item",
+      "sha256": "90f7cf00f6c30a2270f606e3d75d960b4cf1add78b1e02bea9bac80bf5590f0a"
+    },
+    {
+      "table": "ItemArmorQuality",
+      "sha256": "5ed97d2c16c482a11a3f8a39f2766d4ccc37d76b7753e1f81a990d92943634e8"
+    },
+    {
+      "table": "ItemArmorShield",
+      "sha256": "8e72b68a4fde4fe6e645696142591f51c67f75ea53e060ab63d5ae85918fa9ef"
+    },
+    {
+      "table": "ItemArmorTotal",
+      "sha256": "5ca71af99322153b7ff7a036285970b3c2eeddfed8d1607de9c83a26e13786be"
+    },
+    {
+      "table": "ItemDamageOneHand",
+      "sha256": "8fe09490706309d2681660588b276cb387b0b0ce66006de1dcb8c7bc0819a390"
+    },
+    {
+      "table": "ItemDamageRanged",
+      "sha256": "241b1f4229c5183365ebd883fa2b905b7200975fe67cd601fe678f5970f2129e"
+    },
+    {
+      "table": "ItemDamageThrown",
+      "sha256": "085ce6b3b06e93eac737a17b4e90e5b5d7d00d38f536aeea9c466e5d5e5daf54"
+    },
+    {
+      "table": "ItemDamageTwoHand",
+      "sha256": "38cfefde9ca85420816fbd2010fc6971a6d52d20dfdb2479f60ec06ed9f401a0"
+    },
+    {
+      "table": "ItemDamageWand",
+      "sha256": "1b730eeec0d91c5c9749b0c65a9b0002e206e751e5245f235e4d0c0f975f2d46"
+    },
+    {
+      "table": "ItemEffect",
+      "sha256": "f8842c1e6515c4516100d47ab7853aac6ef6f2ad881771e6ae8f06310ba242f3"
+    },
+    {
+      "table": "ItemLimitCategory",
+      "sha256": "a5cd2cc2f7586456d4751a0ca265eb2cce9582aa50fa2a04fc11feddc8bc8e06"
+    },
+    {
+      "table": "ItemSet",
+      "sha256": "171e878421a660aaa5d32991375fd9a7a972979427927aeece3f5813388fe9e9"
+    },
+    {
+      "table": "ItemSetSpell",
+      "sha256": "d3447d27bb126d7bcdef7c408a526b4f203ece397b041f0740db23f1de8a1db0"
+    },
+    {
+      "table": "ItemSparse",
+      "sha256": "7e3090f739c1963a2e7a39e11533b141adf7bd436ac08725a420a660c7b57a9d"
+    },
+    {
+      "table": "ItemXItemEffect",
+      "sha256": "84caef1d6881b2dccbbfa2fe077ec0f33ec3bed858e2664f0380fcc72ab2175b"
+    },
+    {
+      "table": "PlayerExpectedStat",
+      "sha256": "c058693230541acc583ec84541f810e04473325749dfb7e487844ce48be10c05"
+    },
+    {
+      "table": "RandPropPoints",
+      "sha256": "a0dbf24d8ff14a1f9f060eb29c6be08a8df73ed63c0ccec83156110707525acf"
+    },
+    {
+      "table": "SkillLine",
+      "sha256": "7d04a24c9e9f64b01c928db6067d2d1cb7867ae136acb1772ce459591f7def88"
+    },
+    {
+      "table": "SkillLineAbility",
+      "sha256": "05411299908aa0ed42ad766eb8786e087d55a14289f93b06721966f96004fc68"
+    },
+    {
+      "table": "SkillRaceClassInfo",
+      "sha256": "28ad16e798924a4e74963520b1700e015589020484b6db0afa23bd7f5440e21c"
+    },
+    {
+      "table": "Spell",
+      "sha256": "a8b9f7b2de8f1c574768eb2e118fb2577bab062bd22f20818a7126e7d2623ae2"
+    },
+    {
+      "table": "SpellAuraOptions",
+      "sha256": "87667b72f2a02a2da834557f21332c1730a87199a350805bd602249d700eca7d"
+    },
+    {
+      "table": "SpellCastTimes",
+      "sha256": "ee67bc336db6c67f287cfaba0145ed67d54ec5ab843a97ac70089c13e2b704ce"
+    },
+    {
+      "table": "SpellCategories",
+      "sha256": "33de398c858e2c5d03d8565c4b3e2db8e1d994a8c2d5c55d3d04faa0d501c3c4"
+    },
+    {
+      "table": "SpellClassOptions",
+      "sha256": "f8f09508b7f19a3436bf1dfc68ec02bef31173a09f21cbf913a1abc86af31425"
+    },
+    {
+      "table": "SpellCooldowns",
+      "sha256": "2eaafa0a34cf9eb610a7dc9ec224d7725bde3cf3367156c13efccba9b1e1297a"
+    },
+    {
+      "table": "SpellDescriptionVariables",
+      "sha256": "b76a841408829ebfc7f740fcd74ac9da10d43c680def0957abf4f5ead7c9ccd7"
+    },
+    {
+      "table": "SpellDuration",
+      "sha256": "9ec7e66bed7e48d885e4219139117f2aa72ad71cd6432e3b09f58551dcf5c57b"
+    },
+    {
+      "table": "SpellEffect",
+      "sha256": "df0b17132f8a54455d2a458d692706fc56802cd4b4e8c4db6fbf7a5f7d0a68b1"
+    },
+    {
+      "table": "SpellEquippedItems",
+      "sha256": "f1ca963208f4a81353fd03b4a9322f156b5aa5d09b6d5b3d07dbe1fd0ca3e5cf"
+    },
+    {
+      "table": "SpellItemEnchantment",
+      "sha256": "a535d1c02898288257eb6f3d580286fac1413822c347bcfb8db90a86742f8eee"
+    },
+    {
+      "table": "SpellLevels",
+      "sha256": "fb0062715894d35ff7f8d5629cafabe9f3f9aa8f65c416aec0dc06ed64aa12a1"
+    },
+    {
+      "table": "SpellMisc",
+      "sha256": "78098c29bb3500c3ca81d41f51a994ba150ce88ae104a716f86e79e106577346"
+    },
+    {
+      "table": "SpellName",
+      "sha256": "bcb19298f631bcc7fe1b94bef007702ed76edd7566a38435d2508adb028a9c1a"
+    },
+    {
+      "table": "SpellPower",
+      "sha256": "79df84d590bf426e50251a4ffd9759348e68b11ffc565dfd7802556531c5b620"
+    },
+    {
+      "table": "SpellProcsPerMinute",
+      "sha256": "9b5de43a964598104e29b08c4f91c7182390f622000d08de8b4a19e521e9ab51"
+    },
+    {
+      "table": "SpellRadius",
+      "sha256": "2fc7e3d8f6a33a10d09ac8d491ca87e989750b4aa354a02b67fa77de3e141d48"
+    },
+    {
+      "table": "SpellRange",
+      "sha256": "827e28ce9c8be45ce02fd5270249e74810ea3608e6f3989fc154151efadf44fe"
+    },
+    {
+      "table": "SpellTargetRestrictions",
+      "sha256": "f8a5a3946d43c6f599fb46e10cd034f0d6b00f6d1112d4d0fce4108925760edf"
+    },
+    {
+      "table": "SpellXDescriptionVariables",
+      "sha256": "a1b0eb755c5612a1f59606fd5d8380246c1383f153f76f4eef6cd8a20b5e3666"
+    },
+    {
+      "table": "TalentTab",
+      "sha256": "2b246fe95649602a0990a986bf516d05a41a4576031001b1f150ef92a135eaee"
+    },
+    {
+      "table": "TraitCond",
+      "sha256": "d2d430f5d7181e461e67ae9449b40bd5db50a210a047270058d393e324e81f2e"
+    },
+    {
+      "table": "TraitCurrency",
+      "sha256": "15a4f005a701630c67ad749075815eef548ffa22d31fbcaeba8e26e7b0051e47"
+    },
+    {
+      "table": "TraitDefinition",
+      "sha256": "957aa7d01c5ebec4999c8fd8ff319f73aabdde59e4c16c83ee7eac02b885c150"
+    },
+    {
+      "table": "TraitDefinitionEffectPoints",
+      "sha256": "6c30a3e38b0b335ca41f9f1b8dbae0ef49d01398bae7c1cfb452f700eb394bd5"
+    },
+    {
+      "table": "TraitEdge",
+      "sha256": "57ed51f93a5637776adee8231e681e5a97b7f0c26e177d85feeb60d52f51468b"
+    },
+    {
+      "table": "TraitNode",
+      "sha256": "4ec3ea4e5a9b3a24b1911f3c53b396b56206045d78f2362bbd6bb9a5e6bdd3b2"
+    },
+    {
+      "table": "TraitNodeEntry",
+      "sha256": "c7ba81b27544d4bb9a4750e68a7bce19d83b44ffd86b4da88b3758df9e0801b0"
+    },
+    {
+      "table": "TraitNodeGroupXTraitCond",
+      "sha256": "7621d74a79da33a90c5a506f8b08867af3873ff3ec1654ea7934a376db85f8c6"
+    },
+    {
+      "table": "TraitNodeGroupXTraitNode",
+      "sha256": "98db4acb540a51f52103df94d5d2bb7d866dc056f56511f0c8db718e1e178c2b"
+    },
+    {
+      "table": "TraitNodeXTraitNodeEntry",
+      "sha256": "515320200258465db24101f72ea4a5010be9125e0c791b6b942b4fa0a6f731a7"
+    },
+    {
+      "table": "TraitTree",
+      "sha256": "5f4471fdf4dc1a54fc6137d6b18613f7fb4017fbfe79bc77d84a064ec7511878"
+    }
+  ]
+}

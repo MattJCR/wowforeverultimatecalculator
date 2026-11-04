@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { collectStatEffects, deriveStats, healthFromStamina, indexClass, manaFromIntellect, type StatTotal } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70707");
+const D = join(root, "data", "forever", "1.60.1.70755");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 
 const src = { from: "class" as const, name: "Talento", rank: 1, maxRank: 1 };
@@ -83,7 +83,7 @@ describe("estadísticas con talentos", () => {
 });
 
 describe("poder de ataque y poder con hechizos de talentos (cliente + notas de Blizzard)", () => {
-  const D2 = join(root, "data", "forever", "1.60.1.70707");
+  const D2 = join(root, "data", "forever", "1.60.1.70755");
   const j = (f: string) => JSON.parse(readFileSync(join(D2, f), "utf8"));
   const client = ClientStats.parse(j("client-stats.json"));
   const cls = (token: string) => ({
@@ -113,11 +113,11 @@ describe("poder de ataque y poder con hechizos de talentos (cliente + notas de B
     expect(rows.find((r) => r.key === "spell-damage")!.final).toBe(32);
   });
 
-  it("poder de ataque por atributo del cliente: Guerrero 2 por fuerza; Maña mental del Chamán suma el 100 % del intelecto", () => {
+  it("poder de ataque por atributo del cliente: Guerrero 2 por fuerza; Maña mental del Chamán suma el 150 % del intelecto (100 % hasta el 70707)", () => {
     const warrior = deriveStats({ attributes: [150, 90, 120, 20, 30], hpBase: 0, manaBase: 0, totals: [], attackPower: ap(1) });
     expect(warrior.rows.find((r) => r.key === "ap")!.final).toBe(300);
     const shaman = deriveStats({ attributes: [100, 60, 100, 180, 90], hpBase: 0, manaBase: 0, totals: totalsOf("shaman", "Maña mental"), attackPower: ap(7) });
-    expect(shaman.rows.find((r) => r.key === "ap")!.final).toBe(100 * 2 + 180); // 2 por fuerza + 100 % del intelecto
+    expect(shaman.rows.find((r) => r.key === "ap")!.final).toBe(100 * 2 + 180 * 1.5); // 2 por fuerza + 150 % del intelecto (rango 3: 50/100/150 %, notas del 3/11; era 33/67/100 %)
   });
 });
 
