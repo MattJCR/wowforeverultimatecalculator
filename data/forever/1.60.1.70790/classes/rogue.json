@@ -4026,10 +4026,10 @@
             ]
           ],
           "descriptions": [
-            "Remate que marca al objetivo y almacena una parte del daño infligido por tus ataques por cada punto de combo. El daño de Ruptura y de Garrote se almacena a una tasa dos veces mayor. Al cabo de 6 s, se inflige el daño almacenado, hasta un máximo que aumenta en función del poder de ataque y la probabilidad de golpe crítico:\r\n   1 punto: 12% almacenado, ${((63+(1*102)+1*$<maxAP>*$apm)*($mcrit/100+1))*$<coup>} de límite de daño.\r\n   2 puntos: 24% almacenado, ${((63+(2*102)+2*$<maxAP>*$apm)*($mcrit/100+1))*$<coup>} de límite de daño.\r\n   3 puntos: 36% almacenado, ${((63+(3*102)+3*$<maxAP>*$apm)*($mcrit/100+1))*$<coup>} de límite de daño.\r\n   4 puntos: 48% almacenado, ${((63+(4*102)+4*$<maxAP>*$apm)*($mcrit/100+1))*$<coup>} de límite de daño.\r\n   5 puntos: 60% almacenado, ${((63+(5*102)+5*$<maxAP>*$apm)*($mcrit/100+1))*$<coup>} de límite de daño."
+            "Remate que marca al objetivo y almacena una parte del daño infligido por tus ataques por cada punto de combo. El daño de Ruptura y de Garrote se almacena a una tasa dos veces mayor. Al cabo de 6 s, se inflige el daño almacenado, hasta un máximo que aumenta en función del poder de ataque y la probabilidad de golpe crítico:\r\n   1 punto: 12% almacenado, con un límite de daño de 165 más un 4% de tu poder de ataque.\r\n   2 puntos: 24% almacenado, con un límite de daño de 267 más un 8% de tu poder de ataque.\r\n   3 puntos: 36% almacenado, con un límite de daño de 369 más un 12% de tu poder de ataque.\r\n   4 puntos: 48% almacenado, con un límite de daño de 471 más un 16% de tu poder de ataque.\r\n   5 puntos: 60% almacenado, con un límite de daño de 573 más un 20% de tu poder de ataque."
           ],
-          "descriptionsComplete": false,
-          "descriptionsApproximate": false,
+          "descriptionsComplete": true,
+          "descriptionsApproximate": true,
           "maxRank": 1,
           "row": 6,
           "col": 1,

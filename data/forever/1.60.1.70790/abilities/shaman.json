@@ -2020,13 +2020,13 @@
           "radiusYd": 10,
           "charges": [],
           "procs": [],
-          "description": "Golpea a un máximo de 10 enemigos que se encuentran en un cono frente a ti, que reciben de ${$<damagepower>*$m1/100+$m2/100*$AP} a ${$<damagepower>*$M1/100+$m2/100*$AP} p. de daño de Fuego. Esta facultad genera una gran cantidad de amenaza. El daño periódico de Choque de llamas tiene un 10% de probabilidades de restablecer el tiempo de reutilización de Explosión de arrabio.",
+          "description": "Golpea a un máximo de 10 enemigos que se encuentran en un cono frente a ti, que reciben de 120,71 a 181,07 (más un 5% de tu poder de ataque) p. de daño de Fuego. Esta facultad genera una gran cantidad de amenaza. El daño periódico de Choque de llamas tiene un 10% de probabilidades de restablecer el tiempo de reutilización de Explosión de arrabio.",
           "textOrigin": "client",
           "acquireMethod": 3,
           "retired": null,
           "races": null,
-          "descriptionComplete": false,
-          "descriptionTemplate": "Golpea a un máximo de 10 enemigos que se encuentran en un cono frente a ti, que reciben de ${$<damagepower>*$m1/100+$m2/100*$AP} a ${$<damagepower>*$M1/100+$m2/100*$AP} p. de daño de Fuego. Esta facultad genera una gran cantidad de amenaza. El daño periódico de Choque de llamas tiene un {{s:425339:3|10}}% de probabilidades de restablecer el tiempo de reutilización de Explosión de arrabio.",
+          "descriptionComplete": true,
+          "descriptionTemplate": "Golpea a un máximo de 10 enemigos que se encuentran en un cono frente a ti, que reciben de 120,71 a 181,07 (más un 5% de tu poder de ataque) p. de daño de Fuego. Esta facultad genera una gran cantidad de amenaza. El daño periódico de Choque de llamas tiene un {{s:425339:3|10}}% de probabilidades de restablecer el tiempo de reutilización de Explosión de arrabio.",
           "equipped": [],
           "weaponHand": "main"
         }

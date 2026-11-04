@@ -261,6 +261,10 @@ function evaluate(expr: string): number {
   return v;
 }
 
+/** Poder de ataque del personaje en una fórmula del cliente (`$AP`, `$apm`, `$rap`). */
+const AP_TOKEN = /\$(?:apm|AP|rap|RAP|ap)(?![A-Za-z])/;
+const AP_TOKEN_ALL = new RegExp(AP_TOKEN.source, "g");
+
 /** Evalua el interior de ${...}: sustituye los marcadores por su valor numerico y calcula. */
 function evaluateExpression(t: SpellTables, ctx: RenderContext, inner: string): { value: number; approx: boolean } | null {
   // Un «$» suelto detrás de una variable (`$m2$*…` en Descarga de Escarcha) es un error de escritura del cliente: se ignora
@@ -496,6 +500,42 @@ export function renderSpellText(t: SpellTables, template: string, ctx: RenderCon
           if (t.variableDependsOnLevel(ctx.spellId, n)) approximate = true;
           return `(${v})`;
         });
+        // Fórmula que suma poder de ataque del personaje (`${($m1+$<APRatio>*$apm)}`, `${$m3/100*$AP}`, Marca de muerte): es lineal en el poder
+        // de ataque, así que se enseña la base y el porcentaje del poder, como Ataque de la victoria («X más un N% de tu poder de ataque»).
+        // El crítico del personaje (`$mcrit`) vale 0: el texto ya dice que el límite crece con él.
+        if (AP_TOKEN.test(inner)) {
+          const withAp = (value: number) => evaluateExpression(t, ctx, inner.replace(/\$mcrit(?![A-Za-z])/g, "0").replace(AP_TOKEN_ALL, `(${value})`));
+          const base = withAp(0);
+          const plus = withAp(1);
+          if (base && plus) {
+            const pct = Math.round((plus.value - base.value) * 1e4) / 100;
+            const baseValue = base.value;
+            const tail = src.slice(end + 1);
+            const en = locale === "en";
+            const percentOnly = Math.abs(baseValue) < 1e-9;
+            let shown: string;
+            let consumed = 0;
+            if (Math.abs(pct) < 1e-9) shown = formatNumber(baseValue);
+            else if (percentOnly && !en && tail.startsWith(" p. de daño")) {
+              // «inflige un 150% de tu poder de ataque como daño» en vez de «… de tu poder de ataque p. de daño»
+              shown = `un ${formatNumber(pct)}% de tu poder de ataque como daño`;
+              consumed = " p. de daño".length;
+            } else if (percentOnly) shown = en ? `${formatNumber(pct)}% of your attack power` : `un ${formatNumber(pct)}% de tu poder de ataque`;
+            else shown = en ? `${formatNumber(baseValue)} plus ${formatNumber(pct)}% of your attack power` : `${formatNumber(baseValue)} más un ${formatNumber(pct)}% de tu poder de ataque`;
+            // «…, 165 más un 4% de tu poder de ataque de límite de daño» -> «…, con un límite de daño de 165 más un 4% de tu poder de ataque»
+            if (!en && !consumed && /, $/.test(out) && tail.startsWith(" de límite de daño")) {
+              out += `con un límite de daño de ${shown}`;
+              consumed = " de límite de daño".length;
+            } else if (en && !consumed && /, $/.test(out) && tail.startsWith(" damage cap")) {
+              out += `with a damage cap of ${shown}`;
+              consumed = " damage cap".length;
+            } else out += shown;
+            lastNumber = baseValue;
+            approximate = true;
+            i = end + 1 + consumed;
+            continue;
+          }
+        }
         const res = evaluateExpression(t, ctx, inner);
         // Modo plantilla: una expresion con valores de efectos se deja como hueco `{{=EXPR;m:hechizo:efecto;...|valor}}` que el motor
         // recalcula con el nivel (Transfusion de vida «${($m1+$SPI*1)*(1+$18182m1/100)}», Lengua de Fuego «${$8026m1/77-1+($29469m1)}»)
@@ -649,5 +689,9 @@ export function renderSpellText(t: SpellTables, template: string, ctx: RenderCon
     out += ch;
     i++;
   }
+  // «entre 23 más un 20% de tu poder de ataque y 34 más un 20% de tu poder de ataque» -> «entre 23 y 34 (más un 20% de tu poder de ataque)»
+  out = out
+    .replace(/(\d[\d.,]*) más un ([\d.,]+)% de tu poder de ataque (y|a) (\d[\d.,]*) más un \2% de tu poder de ataque/g, "$1 $3 $4 (más un $2% de tu poder de ataque)")
+    .replace(/(\d[\d.,]*) plus ([\d.,]+)% of your attack power (and|to) (\d[\d.,]*) plus \2% of your attack power/g, "$1 $3 $4 (plus $2% of your attack power)");
   return { text: out.replace(/[ \t]+\n/g, "\n").trim(), complete, approximate };
 }

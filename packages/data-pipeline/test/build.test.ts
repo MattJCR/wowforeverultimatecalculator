@@ -1623,3 +1623,30 @@ describe("raciales frente a la referencia externa (cambios futuros que el client
     expect(human.racials.find((a) => a.name === "El espíritu humano")!.reference).toMatchObject({ status: "same", text: "Spirit increased by 10%." });
   });
 });
+
+describe("fórmulas que suman poder de ataque del personaje", () => {
+  const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
+  const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
+  const text = (classId: number, name: string) => abilitiesOf(classId).abilities.find((a) => a.name === name)!.ranks[0]!.description;
+
+  it("se enseñan como «base más un N% de tu poder de ataque», sin dejar marcadores del cliente (Marca de muerte, Ola de choque, Revancha, Explosión de arrabio)", () => {
+    // Marca de muerte: (63 + 102 por punto de combo + 4% del poder de ataque por punto) x crítico x Golpe de gracia; base sin crítico ni talentos
+    const mark = text(4, "Marca de muerte");
+    expect(mark).toContain("1 punto: 12% almacenado, con un límite de daño de 165 más un 4% de tu poder de ataque.");
+    expect(mark).toContain("5 puntos: 60% almacenado, con un límite de daño de 573 más un 20% de tu poder de ataque.");
+    expect(text(1, "Ola de choque")).toContain("inflige un 50% de tu poder de ataque como daño");
+    expect(text(1, "Revancha")).toContain("entre 20,31 y 23,69 (más un 25% de tu poder de ataque) p. de daño");
+    expect(text(7, "Explosión de arrabio")).toContain("de 120,71 a 181,07 (más un 5% de tu poder de ataque) p. de daño de Fuego");
+    for (const [cls, name] of [[4, "Marca de muerte"], [4, "Marca de la muerte"], [1, "Ola de choque"], [1, "Revancha"], [7, "Explosión de arrabio"]] as const) {
+      const rank = abilitiesOf(cls).abilities.find((a) => a.name === name)!.ranks[0]!;
+      expect(rank.description, name).not.toMatch(/\$\{|\$<|\$apm|\$mcrit|\$AP/);
+      expect(rank.descriptionComplete, name).toBe(true);
+    }
+  });
+
+  it("el talento Marca de muerte del Pícaro enseña el mismo texto que la habilidad", () => {
+    const talent = byToken(live, "ROGUE").specs.flatMap((s) => s.talents).find((t) => t.name === "Marca de muerte")!;
+    for (const d of talent.descriptions) expect(d).not.toMatch(/\$\{|\$<|\$apm|\$mcrit/);
+    expect(talent.descriptions[0]).toContain("con un límite de daño de 165 más un 4% de tu poder de ataque");
+  });
+});

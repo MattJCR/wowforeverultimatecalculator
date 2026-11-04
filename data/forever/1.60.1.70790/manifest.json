@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "build": "1.60.1.70790",
   "locale": "esES",
-  "generatedAt": "2026-11-04T19:42:59.135Z",
+  "generatedAt": "2026-11-04T21:27:58.083Z",
   "hotfixesApplied": true,
   "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
   "classes": [
@@ -67,7 +67,7 @@
       ],
       "inactiveCount": 0,
       "file": "classes/rogue.json",
-      "sha256": "c49c8cc903f9a27b2a812f726b62af1db99e0dbcd9a7b00a36124966d5b6ac91",
+      "sha256": "c737fdb96d24d4a461a9ee82517a163973f652d187fe531336811e1915c2aa61",
       "warnings": 0
     },
     {
@@ -221,7 +221,7 @@
     {
       "classId": 1,
       "file": "abilities/warrior.json",
-      "sha256": "8061a68d694ec428db7278ea0837dbbaa577431dff2321492392b7b148e6dc95",
+      "sha256": "8f7fe089d39491aeedf6975ee3a1fdc0f41ff080dee3c2a58554026b039260a0",
       "abilityCount": 51,
       "rankCount": 126
     },
@@ -242,7 +242,7 @@
     {
       "classId": 4,
       "file": "abilities/rogue.json",
-      "sha256": "b0ef9f3de2733187a336cbac07097f6c63457d43f8ffb580dc9ad6b765d1c895",
+      "sha256": "d7d6b0805fa263bef6b1124fe7bcde836656e52eb4517116c4162d8429357376",
       "abilityCount": 56,
       "rankCount": 140
     },
@@ -256,7 +256,7 @@
     {
       "classId": 7,
       "file": "abilities/shaman.json",
-      "sha256": "3f2e46a821d28051ede4141405de0ea9b696a9ecff1a6c7a53621a5b4d0a47d2",
+      "sha256": "8527f590311fcf621ca5373a402711ab4602b8f26892e00cf3da07a593452ec1",
       "abilityCount": 66,
       "rankCount": 207
     },
@@ -317,7 +317,7 @@
   },
   "items": {
     "file": "items.json",
-    "sha256": "ee8bd87a8d07c72e1b164887e9de127d91cd78fccad1aba6ca3d35d281e58680",
+    "sha256": "13e24f8b1af7c38c7798de278805c4ccbce47e63f1a9843211866c7684bd84cd",
     "itemCount": 12633,
     "unavailableCount": 6406
   },
@@ -343,7 +343,7 @@
   },
   "english": {
     "file": "i18n/en.json",
-    "sha256": "9adeac804884282fc29b3633427cdb66143c71c1efe787674deb9e282a1bbfdf"
+    "sha256": "7d192f45ef9c77437cf1d7d119b8ee9c9a8ec8ef961ce745ce1bd3969961e4e0"
   },
   "unassigned": {
     "file": "unassigned.json",
