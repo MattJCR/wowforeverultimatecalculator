@@ -54,8 +54,11 @@ export function loadOfficialEnglish(dir: string, clientRaw: RawTables, clientSpe
   const tablesBuild = existsSync(join(dir, "BUILD.txt")) ? readFileSync(join(dir, "BUILD.txt"), "utf8").trim() : "";
   const itemNames = new Map(read(raw, "ItemSparse").filter((r) => r.Display_lang).map((r) => [int(r.ID), r.Display_lang!] as const));
   // Objetos arrastrados del volcado anterior (carried-from.json): su nombre inglés sale del volcado inglés de esa carpeta
-  const carried = carriedFrom(clientRaw.dir);
-  if (carried && existsSync(join(`${carried}-enUS`, "ItemSparse.csv"))) {
+  // (la cadena se sigue hasta el final, como en csv.ts › carriedRows)
+  const seenCarried = new Set<string>([clientRaw.dir]);
+  for (let carried = carriedFrom(clientRaw.dir); carried && !seenCarried.has(carried); carried = carriedFrom(carried)) {
+    seenCarried.add(carried);
+    if (!existsSync(join(`${carried}-enUS`, "ItemSparse.csv"))) continue;
     for (const r of openRawTables(`${carried}-enUS`).table("ItemSparse")) if (r.Display_lang && !itemNames.has(int(r.ID))) itemNames.set(int(r.ID), r.Display_lang);
   }
   // Nombres consultados aparte (tools/extract/fetch-enus-items.mjs) para los objetos que las tablas no traen

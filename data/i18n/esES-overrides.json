@@ -27,7 +27,8 @@
     "1329256": "Aumenta ${$s1/1000} s la duración de tu facultad Ruptura y ${$s2/1000} s la de tu facultad Garrote.",
     "1329284": "Aumenta $s1 p. la energía que genera tu facultad Apuñalar y reduce ${$s2/1000}.1 s su tiempo de reutilización.",
     "1329286": "Hace que tu facultad Apuñalar tenga un $s1% de probabilidad de añadir $s2 p. de combo al objetivo.",
-    "1329328": "Hace que tu facultad Apuñalar aumente un $1310703s1% el daño infligido por tus venenos y un $1310703s3% tu probabilidad de aplicar venenos durante $1310703d."
+    "1329328": "Hace que tu facultad Apuñalar aumente un $1310703s1% el daño infligido por tus venenos y un $1310703s3% tu probabilidad de aplicar venenos durante $1310703d.",
+    "16757": "Aumenta un $s1% el alcance de tus hechizos Descarga de Escarcha, Lanza de hielo y Ventisca, así como el radio de tus hechizos Nova de Escarcha y Cono de frío."
   },
   "names": {
     "Elixir of Endless Intellect": "Elixir de intelecto interminable",

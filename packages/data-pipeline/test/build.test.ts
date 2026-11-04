@@ -17,7 +17,7 @@ import { buildLegacy } from "../src/legacy.js";
 import { buildUnassigned } from "../src/unassigned.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70755";
+const BUILD = "1.60.1.70790";
 const load = (dir: string) => buildClassTalents(openRawTables(join(root, "data", "raw", dir)), BUILD, "esES");
 
 /** Con los hotfixes de la cache del juego aplicados: la verdad "en vivo". */
@@ -28,7 +28,7 @@ const legacyData = buildLegacy(openRawTables(join(root, "data", "raw", `${BUILD}
 const byToken = (r: typeof live, t: string) => r.classes.find((c) => c.classToken === t)!;
 const TOKENS = ["DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"];
 
-describe("arboles de talentos de Forever (cliente 1.60.1.70755, con hotfixes)", () => {
+describe("arboles de talentos de Forever (cliente 1.60.1.70790, con hotfixes)", () => {
   it("cumple el esquema en todas las clases", () => {
     for (const c of live.classes) expect(() => ClassTalents.parse(c)).not.toThrow();
   });
@@ -338,7 +338,8 @@ describe("hotfixes del servidor frente a los ficheros estaticos", () => {
     // Mago (hotfixes del 19/10) y las tres clases del 70707 sí cambian su estructura respecto al estático
     const changed = TOKENS.filter((tk) => sig(live, tk) !== sig(stat, tk));
     // El 70755 ya trae en el estático lo que el 70707 reordenaba por hotfix; ahora el hotfix reordena Pícaro, Chamán y Guerrero (rediseño del lanzamiento)
-    expect(changed).toEqual(["ROGUE", "SHAMAN", "WARRIOR"]);
+    // El 70790 incorpora esos hotfixes al estático (y su caché de hotfixes, la del 70755, no se aplica a este build): ya no hay diferencias
+    expect(changed).toEqual([]);
   });
 });
 
@@ -867,7 +868,7 @@ describe("idioma: el cliente trae algunos textos de Forever en ingles", () => {
     expect(looksEnglish("")).toBe(false);
   });
 
-  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (10 desde el 70755)", () => {
+  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (11 desde el 70790)", () => {
     const own = all.filter(({ t }) => t.textOrigin === "translated-by-us").map(({ cls, t }) => `${cls}: ${t.name}`);
     // Hasta el 17/10 eran 13; los hotfixes del 19/10 traducen 12 y dejan Tromba de misiles en ingles (y le anaden Explosion de Escarcha)
     // El 70707 devuelve al inglés 18 textos de talentos (rediseño del Paladín y Druida, enfoques de lanzamiento…): traducción propia marcada en data/i18n/esES-overrides.json
@@ -878,6 +879,8 @@ describe("idioma: el cliente trae algunos textos de Forever en ingles", () => {
         "Paladín: Juicio presto", "Paladín: Juramento de escudo", "Paladín: Ahuyentar el mal",
         "Sacerdote: Vínculo sagrado",
         "Pícaro: Salpicadura de sangre", "Pícaro: Veneno", "Pícaro: Destello de acero", "Pícaro: Cuchillo de bota",
+        // El estático del 70790 devuelve al inglés Alcance ártico (en el 70755 venía en español): se conserva el español que traía el cliente
+        "Mago: Alcance ártico",
       ].sort(),
     );
     expect(all.filter(({ t }) => t.textOrigin === "untranslated")).toEqual([]);
@@ -1466,7 +1469,7 @@ describe("estadisticas por clase y nivel del cliente (PlayerExpectedStat y ChrCl
 });
 
 
-describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70755)", () => {
+describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70790)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
   const COND = /\uE000([sa]\d+(?:\|[sa]\d+)*)\uE001([^\uE001]*)\uE001([^\uE002]*)\uE002/;

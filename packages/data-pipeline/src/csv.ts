@@ -58,7 +58,7 @@ function staticTextWhereHotfixIsUntranslated(dir: string, name: string, rows: Ro
 }
 
 /** Tablas de objetos cuyas filas ausentes se pueden arrastrar del volcado anterior (`carried-from.json`). */
-const CARRIED_TABLES = new Set(["Item", "ItemSparse", "ItemSearchName"]);
+const CARRIED_TABLES = new Set(["Item", "ItemSparse", "ItemSearchName", "ItemEffect", "ItemXItemEffect"]);
 
 /**
  * El 70658 se leyó desde la pantalla de personajes y su caché trae ≈ 4 100 filas de ItemSparse menos que la del 70532 (objetos
@@ -71,17 +71,46 @@ export function carriedFrom(dir: string): string | null {
   return existsSync(marker) ? join(dir, "..", (JSON.parse(readFileSync(marker, "utf8")) as { from: string }).from) : null;
 }
 
+/** Tablas de objetos que `"carriedWins"` deja con la fila del volcado anterior. */
+const ITEM_ROW_TABLES = new Set(["Item", "ItemSparse", "ItemSearchName"]);
+
+/**
+ * Tablas de hechizos con filas que solo llegaban por hotfix (consumibles nuevos, hechizos de objeto). Solo se arrastran si el marcador
+ * lleva `"spellTables": true` (caché de hotfixes que no se aplica al build nuevo, p. ej. el 70790) y solo del primer nivel.
+ */
+const CARRIED_SPELL_TABLES = new Set([
+  "Spell", "SpellName", "SpellEffect", "SpellMisc", "SpellAuraOptions", "SpellCategories", "SpellClassOptions", "SpellCooldowns",
+  "SpellEquippedItems", "SpellLevels", "SpellPower", "SpellRadius", "SpellTargetRestrictions", "SpellProcsPerMinute",
+]);
+
 function carriedRows(dir: string, name: string, rows: Row[]): number {
-  const source = carriedFrom(dir);
-  if (!CARRIED_TABLES.has(name) || !source) return 0;
-  const from = join(source, `${name}.csv`);
-  if (!existsSync(from)) return 0;
+  const spellTable = CARRIED_SPELL_TABLES.has(name);
+  if (!CARRIED_TABLES.has(name) && !spellTable) return 0;
+  const marker = join(dir, "carried-from.json");
+  if (spellTable && !(existsSync(marker) && (JSON.parse(readFileSync(marker, "utf8")) as { spellTables?: boolean }).spellTables)) return 0;
+  // `"carriedWins": true`: las filas de objeto del primer nivel sustituyen a las del volcado nuevo (los hotfixes del servidor siguen vigentes
+  // aunque la caché no se pueda aplicar a este build y el estático conserva la fila anterior al hotfix).
+  const carriedWins = existsSync(marker) && (JSON.parse(readFileSync(marker, "utf8")) as { carriedWins?: boolean }).carriedWins === true && ITEM_ROW_TABLES.has(name);
+  const index = new Map(rows.map((r, i) => [r.ID, i] as const));
   const have = new Set(rows.map((r) => r.ID));
   let added = 0;
-  for (const r of parse(readFileSync(from), { columns: true, bom: true, skip_empty_lines: true, relax_column_count: true }) as Row[]) {
-    if (!have.has(r.ID!)) {
-      rows.push(r);
-      added++;
+  // La cadena se sigue hasta el final (70790 → 70755 → 70532): un volcado que arrastra de otro que a su vez arrastra.
+  const seen = new Set<string>([dir]);
+  for (let source = carriedFrom(dir); source && !seen.has(source) && !(spellTable && seen.size > 1); source = carriedFrom(source)) {
+    const first = seen.size === 1;
+    seen.add(source);
+    const from = join(source, `${name}.csv`);
+    if (!existsSync(from)) continue;
+    for (const r of parse(readFileSync(from), { columns: true, bom: true, skip_empty_lines: true, relax_column_count: true }) as Row[]) {
+      if (carriedWins && first && index.has(r.ID)) {
+        rows[index.get(r.ID)!] = r;
+        continue;
+      }
+      if (!have.has(r.ID!)) {
+        have.add(r.ID);
+        rows.push(r);
+        added++;
+      }
     }
   }
   return added;
