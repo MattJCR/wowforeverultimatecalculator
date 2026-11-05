@@ -3421,19 +3421,19 @@
           "textOrigin": "client",
           "rankValues": [
             [
-              5
+              7
             ],
             [
-              10
+              13
             ],
             [
-              15
+              20
             ]
           ],
           "descriptions": [
-            "Aumenta un 5% más toda la amenaza generada en actitud defensiva mientras llevas un escudo.",
-            "Aumenta un 10% más toda la amenaza generada en actitud defensiva mientras llevas un escudo.",
-            "Aumenta un 15% más toda la amenaza generada en actitud defensiva mientras llevas un escudo."
+            "Aumenta un 7% más toda la amenaza generada en actitud defensiva mientras llevas un escudo.",
+            "Aumenta un 13% más toda la amenaza generada en actitud defensiva mientras llevas un escudo.",
+            "Aumenta un 20% más toda la amenaza generada en actitud defensiva mientras llevas un escudo."
           ],
           "descriptionsComplete": true,
           "descriptionsApproximate": false,

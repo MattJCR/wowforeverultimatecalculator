@@ -33,10 +33,11 @@ describe("textos de las habilidades frente a la referencia (nivel 60, sin talent
   // 70707: Paladín 161 de 167 (salen 5 habilidades del libro y entra Juramento de luz, que la referencia no lista) y 25 distintas (24 antes: Escudo Sagrado, Vigilia de la Luz y Furia justa
   // cambian por hotfix y la referencia declara el build 70630); Druida 208 (Lacerar y Mordedura feroz ganan rangos de entrenador)
   const EXPECTED: Record<string, [number, number]> = {
+    // 5/11 (70790, primera lectura con el juego en el mundo): Guerrero 109 (Actitud defensiva r1 ya trae el 80 % de amenaza del hotfix del 4/11, igual que la referencia; el resto sigue como en el 70755).
     // 70755 (la referencia declara el 70753): cambios del lanzamiento que aún no trae (notas de Blizzard del 3/11 y hotfix del Cazador): Guerrero 108 (Embate 15 s, Lanzazo 75 %), Paladín 162 (Escudo Sagrado rango 4),
     // Pícaro 118 (Mutilar pierde un rango; venenos y Hemorragia cambian), Cazador 93 (Tiro de puntería, Tiro Arcano, Aguijón de serpiente, Aspecto del halcón, Aura de disparo certero, Disparo de francotirador),
     // Chamán 149 de 179 (Descarga de relámpagos, Choque de tierra/llamas/Escarcha, Cadena de relámpagos, Mareas vivas, Golpe de tormenta) y Druida 165 (Destripar, Fuego estelar, Triturar, Zarpa, Arañazo, Mordedura feroz, Devastar, Lanzarse)
-    warrior: [116, 108], paladin: [162, 137], rogue: [118, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 93], shaman: [179, 149], warlock: [171, 166], druid: [208, 165],
+    warrior: [116, 109], paladin: [162, 137], rogue: [118, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 93], shaman: [179, 149], warlock: [171, 166], druid: [208, 165],
   };
   for (const c of CLASSES) {
     it(`${c}: ${EXPECTED[c]![1]} de ${EXPECTED[c]![0]} textos con las mismas cifras`, () => {

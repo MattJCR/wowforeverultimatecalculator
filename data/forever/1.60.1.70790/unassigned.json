@@ -4945,43 +4945,24 @@
       "spellId": 1310709,
       "name": null,
       "equipped": [],
-      "effectInfo": [
-        {
-          "index": 0,
-          "aura": 107,
-          "miscValue": 12,
-          "miscValueB": 0,
-          "classMask": [
-            65536,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
+      "effectInfo": [],
       "textOrigin": "client",
-      "passive": true,
-      "iconFileDataId": 132290,
+      "passive": false,
+      "iconFileDataId": null,
       "descriptions": [
         "",
         ""
       ],
       "rankValues": [
-        [
-          1
-        ],
-        [
-          2
-        ]
+        [],
+        []
       ],
       "descriptionsComplete": true,
       "descriptionsApproximate": false,
       "maxRank": 2,
-      "classId": 4,
-      "className": "Pícaro",
-      "classVote": {
-        "Pícaro": 1
-      },
+      "classId": null,
+      "className": null,
+      "classVote": {},
       "isLegacy": false,
       "legacyPlaced": false,
       "status": "unassigned",
@@ -4994,43 +4975,24 @@
       "spellId": 1310709,
       "name": null,
       "equipped": [],
-      "effectInfo": [
-        {
-          "index": 0,
-          "aura": 107,
-          "miscValue": 12,
-          "miscValueB": 0,
-          "classMask": [
-            65536,
-            0,
-            0,
-            0
-          ]
-        }
-      ],
+      "effectInfo": [],
       "textOrigin": "client",
-      "passive": true,
-      "iconFileDataId": 132290,
+      "passive": false,
+      "iconFileDataId": null,
       "descriptions": [
         "",
         ""
       ],
       "rankValues": [
-        [
-          1
-        ],
-        [
-          2
-        ]
+        [],
+        []
       ],
       "descriptionsComplete": true,
       "descriptionsApproximate": false,
       "maxRank": 2,
-      "classId": 4,
-      "className": "Pícaro",
-      "classVote": {
-        "Pícaro": 1
-      },
+      "classId": null,
+      "className": null,
+      "classVote": {},
       "isLegacy": false,
       "legacyPlaced": false,
       "status": "unassigned",
