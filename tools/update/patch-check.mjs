@@ -147,7 +147,7 @@ step("raw", "Tablas en bruto (diff-raw)", () => {
   const same = (a, b) => ["Spell", "SpellName", "ItemSparse", "SpellEffect"].every((t) => sha(join(a, `${t}.csv`)) === sha(join(b, `${t}.csv`)));
   if (!existsSync(rawNew)) return { status: "warn", summary: `no existe ${rawNew}`, body: ["Exporta con `HOTFIXES=1 tools/extract/export-tables.sh " + newBuild + "` (docs/EXTRACTION.md)."], decisions: ["raw: falta el volcado con hotfixes del build nuevo"] };
   if (existsSync(rawNewStatic) && same(rawNewStatic, rawNew)) dec.push("raw: el volcado con hotfixes es IDÉNTICO al estático: ¿DBCache.bin es del build anterior? (hay que entrar al juego y re-extraer)");
-  if (existsSync(join(rawNew, "carried-from.json"))) body.push(`- ℹ El volcado nuevo arrastra filas de objetos de otra carpeta (\`carried-from.json\` → ${JSON.parse(readFileSync(join(rawNew, "carried-from.json"), "utf8")).from}). Borra el fichero cuando la caché sea completa.`);
+  if (existsSync(join(rawNew, "carried-from.json"))) body.push(`- ℹ El volcado nuevo arrastra filas de objetos de otra carpeta (\`carried-from.json\` → ${JSON.parse(readFileSync(join(rawNew, "carried-from.json"), "utf8")).from}). Borra el fichero cuando la caché sea completa. Para completarla: \`node tools/extract/build-itemcache-addon.mjs ${newBuild}\` regenera el addon manual de \`tools/addon/WFUC_ItemCache\` (lo copia el usuario a Interface\\AddOns; ver su README), y tras jugar y salir bien se repite la lectura.`);
   let total = 0;
   const compare = (label, a, b) => {
     if (!a || !existsSync(a)) {
