@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: WFUC ItemCache
+## Notes: Pide por lotes pequenos los objetos que faltan en la cache local (manual: /wfucitems start)
+## Author: local
+## Version: 2
+## SavedVariables: WFUC_ItemCacheDB
+
+WFUC_ItemCache.lua
