@@ -1,8 +1,8 @@
 // Genera el addon WFUC_ItemCache en tools/addon/WFUC_ItemCache/ (fuera del cliente; NO lo instala).
 // Pide al servidor, poco a poco, los objetos que conocemos y que la caché local de hotfixes (DBCache.bin) no trae.
 // Uso: node tools/extract/build-itemcache-addon.mjs [build]     (por defecto 1.60.1.70790)
-// El usuario copia la carpeta a Interface\AddOns a mano, juega con /wfucitems start y, tras salir bien del juego,
-// se repite la lectura de hotfixes (docs/EXTRACTION.md). El cliente sigue siendo solo lectura para las herramientas.
+// El usuario copia la carpeta a Interface\AddOns a mano, juega con el botón del minimapa (o /wfucitems start) y, tras salir
+// bien del juego, se repite la lectura de hotfixes (docs/EXTRACTION.md). El cliente sigue siendo solo lectura para las herramientas.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,58 +28,223 @@ const list = [...known].filter((x) => !have.has(x)).sort((a, b) => a - b);
 const rows = [];
 for (let i = 0; i < list.length; i += 14) rows.push(`  ${list.slice(i, i + 14).join(", ")},`);
 const minutes = Math.ceil((list.length / BATCH) * INTERVAL / 60);
-const lua = `-- WFUC_ItemCache v2: pide al servidor, poco a poco, los ${list.length} objetos conocidos que faltan en la cache local.
--- Uso: /wfucitems start | stop | status | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
+const listId = `${BUILD}:${list.length}:${list.reduce((s, x) => (s + x) % 1000000007, 0)}`;
+
+// Las rutas de textura van con «/» (WoW las acepta) para no depender de escapes de Lua.
+const lua = `-- WFUC_ItemCache v3: pide al servidor, poco a poco, los ${list.length} objetos conocidos que faltan en la cache local.
+-- Boton en el minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
+-- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
+-- Tambien: /wfucitems start | stop | status | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
 local ids = {
 ${rows.join("\n")}
 }
 local BATCH, INTERVAL = ${BATCH}, ${INTERVAL} -- ${BATCH} peticiones cada ${INTERVAL} segundos (~${minutes} min en total)
-local LIST_ID = '${BUILD}:${list.length}:${list.reduce((s, x) => (s + x) % 1000000007, 0)}' -- identifica ESTA lista de ids
-WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
-local db = WFUC_ItemCacheDB
-if db.list ~= LIST_ID then db.list, db.idx = LIST_ID, 1 end -- lista nueva (otro parche): empezar de cero; la misma: retomar
-local ticker
+local LIST_ID = '${listId}' -- identifica ESTA lista de ids
+local COLORS = { red = { 0.9, 0.15, 0.15 }, orange = { 1, 0.55, 0 }, yellow = { 1, 0.9, 0.1 }, green = { 0.15, 0.8, 0.2 } }
+local atan2 = math.atan2 or math.atan
+
+local db, ticker, button, refresh -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
+
 local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
+
+local function cached(id)
+  if C_Item and C_Item.IsItemDataCachedByID then return C_Item.IsItemDataCachedByID(id) end
+  return GetItemInfo(id) ~= nil
+end
+
+-- Cuenta cuantos de los ya pedidos conoce el cliente (solo de los ya pedidos, para no lanzar peticiones nuevas).
+local knownCache, knownAt = 0, -100
 local function known()
+  if GetTime() - knownAt < 5 then return knownCache end
   local n = 0
-  for _, id in ipairs(ids) do if GetItemInfo(id) then n = n + 1 end end
+  for i = 1, math.min(db.idx - 1, #ids) do if cached(ids[i]) then n = n + 1 end end
+  knownCache, knownAt = n, GetTime()
   return n
 end
-local function stop(why) if ticker then ticker:Cancel() ticker = nil end say(why) end
+
+local function state()
+  if not db then return 'red', 'Cargando' end
+  if ticker then
+    if UnitAffectingCombat('player') then return 'yellow', 'En pausa (combate)' end
+    return 'orange', 'Trabajando'
+  end
+  if db.idx > #ids then return 'green', 'Terminado' end
+  if db.idx == 1 then return 'red', 'Sin empezar' end
+  return 'yellow', 'Pendiente: parado a mitad'
+end
+
+refresh = function()
+  if not button then return end
+  local color = COLORS[(state())]
+  button.dot:SetColorTexture(color[1], color[2], color[3], 1)
+end
+
+local function stop(why)
+  if ticker then ticker:Cancel() ticker = nil end
+  if why then say(why) end
+  refresh()
+end
+
 local function tick()
   if UnitAffectingCombat('player') then return end
   local sent = 0
   while sent < BATCH do
     local id = ids[db.idx]
     if not id then
-      stop('terminado: recorridos los ' .. #ids .. '. Espera 1 min, escribe /wfucitems status y despues /logout (salir del todo, sin cierre forzado).')
+      stop('terminado: recorridos los ' .. #ids .. '. Espera 1 min y despues /logout (salir del todo, sin cierre forzado).')
       return
     end
     db.idx = db.idx + 1
-    if not GetItemInfo(id) then -- los que el cliente ya conoce no se piden
+    if not cached(id) then -- los que el cliente ya conoce no se piden
       if C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) else GetItemInfo(id) end
       sent = sent + 1
     end
   end
   if db.idx % 500 < 12 then say((db.idx - 1) .. ' / ' .. #ids) end
 end
+
+local function start()
+  if not db then return end
+  if ticker then say('ya esta en marcha') return end
+  if db.idx > #ids then say('ya esta terminado (Mayus + clic derecho o /wfucitems reset para empezar de cero)') refresh() return end
+  ticker = C_Timer.NewTicker(INTERVAL, tick)
+  say('retomando desde ' .. db.idx .. ' / ' .. #ids .. ' (se detiene en combate o al cambiar de zona)')
+  refresh()
+end
+
+local function status()
+  local _, label = state()
+  say(label .. ': recorridos ' .. (db.idx - 1) .. ' / ' .. #ids .. '; ya conocidos por el cliente de los pedidos: ' .. known())
+end
+
+local function reset()
+  stop()
+  db.idx = 1
+  say('avance a cero')
+  refresh()
+end
+
+local function placeButton()
+  local a = math.rad(db.angle or 200)
+  button:ClearAllPoints()
+  button:SetPoint('CENTER', Minimap, 'CENTER', math.cos(a) * 80, math.sin(a) * 80)
+end
+
+local function showTooltip(self)
+  local _, label = state()
+  GameTooltip:SetOwner(self, 'ANCHOR_LEFT')
+  GameTooltip:ClearLines()
+  GameTooltip:AddLine('WFUC ItemCache')
+  GameTooltip:AddLine(label, 1, 1, 1)
+  local done = math.min(db.idx - 1, #ids)
+  GameTooltip:AddLine(done .. ' / ' .. #ids .. ' (' .. math.floor(done * 100 / #ids) .. '%)', 0.8, 0.8, 0.8)
+  if db.idx > #ids then
+    GameTooltip:AddLine('Recibidos por el cliente: ' .. known() .. '. El resto, probablemente ya no existe en el servidor.', 0.8, 0.8, 0.8, true)
+  else
+    GameTooltip:AddLine('Faltan unos ' .. math.ceil((#ids - done) / BATCH * INTERVAL / 60) .. ' min', 0.8, 0.8, 0.8)
+  end
+  GameTooltip:AddLine(' ')
+  GameTooltip:AddLine('Clic izquierdo: empezar / parar', 0.6, 0.8, 1)
+  GameTooltip:AddLine('Clic derecho: estado en el chat', 0.6, 0.8, 1)
+  GameTooltip:AddLine('Mayus + clic derecho: empezar de cero', 0.6, 0.8, 1)
+  GameTooltip:AddLine('Arrastrar: mover el boton', 0.6, 0.8, 1)
+  GameTooltip:Show()
+end
+
+local function createButton()
+  button = CreateFrame('Button', 'WFUCItemCacheButton', Minimap)
+  button:SetSize(31, 31)
+  button:SetFrameStrata('MEDIUM')
+  button:SetFrameLevel(8)
+  button:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+  button:RegisterForDrag('LeftButton')
+  local bg = button:CreateTexture(nil, 'BACKGROUND')
+  bg:SetSize(20, 20)
+  bg:SetPoint('CENTER', 0, 1)
+  bg:SetTexture('Interface/Minimap/UI-Minimap-Background')
+  local dot = button:CreateTexture(nil, 'ARTWORK')
+  dot:SetSize(17, 17)
+  dot:SetPoint('CENTER', 0, 1)
+  dot:SetColorTexture(1, 1, 1, 1)
+  if button.CreateMaskTexture then -- circulo; sin mascara se ve cuadrado pero funciona igual
+    local mask = button:CreateMaskTexture()
+    mask:SetTexture('Interface/CharacterFrame/TempPortraitAlphaMask', 'CLAMPTOBLACKADDITIVE', 'CLAMPTOBLACKADDITIVE')
+    mask:SetAllPoints(dot)
+    dot:AddMaskTexture(mask)
+  end
+  button.dot = dot
+  local border = button:CreateTexture(nil, 'OVERLAY')
+  border:SetSize(53, 53)
+  border:SetPoint('TOPLEFT')
+  border:SetTexture('Interface/Minimap/MiniMap-TrackingBorder')
+  local label = button:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+  label:SetPoint('CENTER', 0, 1)
+  label:SetText('WF')
+  label:SetTextColor(0, 0, 0)
+  button:SetHighlightTexture('Interface/Minimap/UI-Minimap-ZoomButton-Highlight')
+  button:SetScript('OnClick', function(_, b)
+    if b == 'RightButton' then
+      if IsShiftKeyDown() then reset() else status() end
+    elseif ticker then
+      stop('parado en ' .. db.idx .. ' / ' .. #ids)
+    else
+      start()
+    end
+  end)
+  local tipTicker
+  button:SetScript('OnEnter', function(self)
+    showTooltip(self)
+    tipTicker = C_Timer.NewTicker(1, function() if GameTooltip:GetOwner() == self then showTooltip(self) end end)
+  end)
+  button:SetScript('OnLeave', function() if tipTicker then tipTicker:Cancel() tipTicker = nil end GameTooltip:Hide() end)
+  button:SetScript('OnDragStart', function(self)
+    self:SetScript('OnUpdate', function()
+      local mx, my = Minimap:GetCenter()
+      local px, py = GetCursorPosition()
+      local s = Minimap:GetEffectiveScale()
+      db.angle = math.deg(atan2(py / s - my, px / s - mx))
+      placeButton()
+    end)
+  end)
+  button:SetScript('OnDragStop', function(self) self:SetScript('OnUpdate', nil) end)
+  placeButton()
+  refresh()
+end
+
 local ev = CreateFrame('Frame')
+ev:RegisterEvent('ADDON_LOADED')
 ev:RegisterEvent('PLAYER_LEAVING_WORLD')
-ev:SetScript('OnEvent', function() if ticker then ticker:Cancel() ticker = nil end end)
+ev:RegisterEvent('PLAYER_REGEN_DISABLED')
+ev:RegisterEvent('PLAYER_REGEN_ENABLED')
+ev:SetScript('OnEvent', function(_, event, arg1)
+  if event == 'ADDON_LOADED' then
+    if arg1 ~= 'WFUC_ItemCache' then return end
+    WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
+    db = WFUC_ItemCacheDB
+    if db.list ~= LIST_ID then db.list, db.idx = LIST_ID, 1 end -- lista nueva (otro parche): empezar de cero; la misma: retomar
+    db.idx = db.idx or 1
+    createButton()
+    ev:UnregisterEvent('ADDON_LOADED')
+  elseif event == 'PLAYER_LEAVING_WORLD' then
+    if ticker then ticker:Cancel() ticker = nil end
+    refresh()
+  else
+    refresh() -- entrar o salir de combate cambia naranja <-> amarillo
+  end
+end)
+
 SLASH_WFUCITEMS1 = '/wfucitems'
 SlashCmdList.WFUCITEMS = function(arg)
+  if not db then return end
   arg = (arg or ''):lower()
-  if arg == 'start' then
-    if ticker then say('ya esta en marcha') return end
-    ticker = C_Timer.NewTicker(INTERVAL, tick)
-    say('retomando desde ' .. db.idx .. ' / ' .. #ids .. ' (se detiene en combate o al cambiar de zona; /wfucitems stop para parar)')
+  if arg == 'start' then start()
   elseif arg == 'stop' then stop('parado en ' .. db.idx .. ' / ' .. #ids)
-  elseif arg == 'reset' then db.idx = 1 say('avance a cero')
-  else say('recorridos ' .. (db.idx - 1) .. ' / ' .. #ids .. '; ya conocidos por el cliente: ' .. known()) end
+  elseif arg == 'reset' then reset()
+  else status() end
 end
 `;
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.lua"), lua);
-fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos que faltan en la cache local (manual: /wfucitems start)\n## Author: local\n## Version: 2\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
+fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos que faltan en la cache local (boton del minimapa o /wfucitems start)\n## Author: local\n## Version: 3\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
 console.log(`${list.length} objetos (≈ ${minutes} min) → ${path.relative(ROOT, OUT)}`);
