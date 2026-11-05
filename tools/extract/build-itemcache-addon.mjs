@@ -35,8 +35,10 @@ local ids = {
 ${rows.join("\n")}
 }
 local BATCH, INTERVAL = ${BATCH}, ${INTERVAL} -- ${BATCH} peticiones cada ${INTERVAL} segundos (~${minutes} min en total)
-WFUC_ItemCacheDB = WFUC_ItemCacheDB or { idx = 1 }
+local LIST_ID = '${BUILD}:${list.length}:${list.reduce((s, x) => (s + x) % 1000000007, 0)}' -- identifica ESTA lista de ids
+WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
 local db = WFUC_ItemCacheDB
+if db.list ~= LIST_ID then db.list, db.idx = LIST_ID, 1 end -- lista nueva (otro parche): empezar de cero; la misma: retomar
 local ticker
 local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
 local function known()

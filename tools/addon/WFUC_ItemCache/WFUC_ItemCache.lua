@@ -681,8 +681,10 @@ local ids = {
   288922, 288923, 288924, 288925, 289302,
 }
 local BATCH, INTERVAL = 5, 2 -- 5 peticiones cada 2 segundos (~64 min en total)
-WFUC_ItemCacheDB = WFUC_ItemCacheDB or { idx = 1 }
+local LIST_ID = '1.60.1.70790:9469:691146926' -- identifica ESTA lista de ids
+WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
 local db = WFUC_ItemCacheDB
+if db.list ~= LIST_ID then db.list, db.idx = LIST_ID, 1 end -- lista nueva (otro parche): empezar de cero; la misma: retomar
 local ticker
 local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
 local function known()
