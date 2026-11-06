@@ -4,11 +4,12 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildClassTalents } from "./build.js";
 import { contrastAbilities, contrastClass, contrastLegacy, contrastOrphans, contrastRaces } from "./contrast.js";
-import { openRawTables } from "./csv.js";
+import { int, openRawTables } from "./csv.js";
 import { ClientStats, CombatFormulas, EnglishText, TalentRules, Abilities, BaseStats, ClassTalents, CombatRatings, Buffs, Enchants, WeaponEnhancements, EquipRules, ItemSources, Items, Manifest, RandomSuffixes, Races, Unassigned } from "./model.js";
 import { buildEquipRules } from "./equip-rules.js";
 import { buildItems } from "./items.js";
 import { buildItemSources } from "./item-sources.js";
+import { observedSources, type ObservedSources } from "./observed-sources.js";
 import { buildBuffs, type BuffRules } from "./buffs.js";
 import { buildWeaponEnhancements } from "./weapon-enhancements.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "./wowsims.js";
@@ -144,7 +145,18 @@ function build(): void {
     itemsEntry = { file: "items.json", sha256: sha256(itemsText), itemCount: itemsData.items.length, unavailableCount: itemsData.unavailable.length };
     for (const w of itemsData.warnings) console.log(`   aviso (objetos): ${w}`);
     if (["SkillLine", "SkillLineAbility", "SpellEffect"].every((t) => existsSync(join(rawDir, `${t}.csv`)))) {
-      const sources = ItemSources.parse(buildItemSources(raw, buildId, new Set(itemsData.items.filter((i) => !i.placeholder).map((i) => i.id))));
+      const sourceItemIds = new Set(itemsData.items.filter((i) => !i.placeholder).map((i) => i.id));
+      const builtSources = buildItemSources(raw, buildId, sourceItemIds);
+      // Botín, vendedores y misiones observados jugando con el addon de la caché (data/observed, nuestros datos; procedencia beta-measured).
+      const observedFile = join(repoRoot, "data", "observed", "sources.json");
+      if (existsSync(observedFile)) {
+        const staticDir = join(repoRoot, "data", "raw", buildId);
+        const currencies = new Map<number, string>();
+        if (existsSync(join(staticDir, "CurrencyTypes.csv"))) for (const r of openRawTables(staticDir).table("CurrencyTypes")) currencies.set(int(r.ID), r.Name_lang ?? "");
+        const names = new Map(itemsData.items.map((i) => [i.id, i.name] as const));
+        for (const [id, list] of observedSources(JSON.parse(readFileSync(observedFile, "utf8")) as ObservedSources, sourceItemIds, names, currencies)) (builtSources.items[String(id)] ??= []).push(...list);
+      }
+      const sources = ItemSources.parse(builtSources);
       const sourcesText = `${JSON.stringify(sources)}
 `;
       writeFileSync(join(outDir, "sources.json"), sourcesText);

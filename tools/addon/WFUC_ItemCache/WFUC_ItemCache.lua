@@ -1,9 +1,10 @@
--- WFUC_ItemCache v4: pide al servidor, poco a poco, los 9653 objetos y 403 hechizos de objeto que conocemos y faltan en la cache local.
--- Objetos: los 9469 de la lista base + 184 que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
+-- WFUC_ItemCache v5: pide al servidor, poco a poco, los 9689 objetos y 403 hechizos de objeto que conocemos y faltan en la cache local.
+-- Objetos: los 9469 de la lista base + 220 que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
+-- Ademas anota, sin pedir nada, lo que el juego ya te ensena: botin por criatura/objeto (cuerpos y veces que salio cada objeto), vendedores con sus costes y recompensas de mision (WFUC_ItemCacheDB.seen).
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
 -- Boton en el minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
 -- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
--- Tambien: /wfucitems start | stop | status | report | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
+-- Tambien: /wfucitems start | stop | status | report | seen | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
 local ids = {
   17, 192, 647, 753, 754, 776, 809, 811, 812, 833, 862, 867, 868, 869,
@@ -682,20 +683,23 @@ local ids = {
   288873, 288874, 288875, 288876, 288877, 288878, 288879, 288880, 288881, 288882, 288883, 288884, 288885, 288886,
   288887, 288888, 288889, 288890, 288891, 288892, 288893, 288894, 288901, 288902, 288903, 288904, 288905, 288906,
   288907, 288908, 288909, 288910, 288911, 288913, 288914, 288915, 288916, 288917, 288918, 288919, 288920, 288921,
-  288922, 288923, 288924, 288925, 289302, 1664, 2824, 7188, 9196, 9479, 10750, 10782, 12413, 12423,
-  13243, 14557, 16803, 17075, 17078, 18204, 18720, 18806, 18824, 19134, 19135, 19878, 22302, 22305,
-  22406, 167648, 171470, 217294, 217299, 221030, 223326, 227683, 227684, 227952, 227955, 227957, 227961, 228070,
-  228254, 228272, 228285, 228591, 229380, 230248, 230802, 232299, 236020, 236149, 236150, 236490, 236491, 236500,
-  236501, 246494, 246495, 246618, 246619, 247829, 249533, 252024, 252025, 254431, 256067, 262891, 262892, 262897,
-  262898, 271718, 271895, 271896, 271897, 271899, 271900, 271901, 271942, 271943, 272050, 272460, 272466, 272482,
-  272493, 272546, 272547, 272605, 272607, 272610, 272612, 272613, 272615, 272616, 272618, 272620, 272621, 272622,
-  272623, 272624, 272628, 272629, 272631, 272632, 272633, 272635, 272638, 272639, 272644, 272645, 272646, 272651,
-  272652, 272653, 272654, 272655, 272658, 272659, 272660, 272661, 272662, 272664, 272665, 272666, 272667, 272668,
-  272672, 272673, 272674, 272675, 272676, 272679, 272688, 272689, 272690, 272691, 272692, 272714, 272798, 272799,
-  272832, 272836, 272861, 272862, 272863, 272864, 272865, 273354, 273446, 273603, 274216, 274242, 274440, 274441,
-  274442, 274443, 275712, 276208, 276214, 276215, 278512, 278548, 278549, 278550, 278551, 278552, 278553, 278972,
-  278976, 279495, 280202, 280204, 281655, 286650, 287065, 287072, 287073, 287074, 287075, 287076, 287077, 287417,
-  287961, 288506, 288619, 288998, 289291, 289293, 289438,
+  288922, 288923, 288924, 288925, 289302, 1664, 2824, 7188, 9196, 9479, 10710, 10750, 10782, 12413,
+  12423, 13243, 14557, 16803, 17075, 17078, 18204, 18720, 18806, 18824, 19134, 19135, 19878, 22302,
+  22305, 22406, 33176, 33182, 33184, 33277, 33292, 33977, 34068, 37011, 37012, 37828, 37863, 38280,
+  48663, 49074, 49076, 49078, 49080, 49116, 49118, 49120, 49641, 50250, 50446, 50471, 50741, 51804,
+  51805, 51806, 51807, 51808, 167648, 171470, 211817, 211844, 211847, 211850, 211851, 217294, 217299, 221030,
+  223326, 227683, 227684, 227952, 227955, 227957, 227961, 228070, 228254, 228272, 228285, 228591, 229380, 230248,
+  230802, 232299, 236020, 236149, 236150, 236490, 236491, 236500, 236501, 246494, 246495, 246618, 246619, 247829,
+  249533, 252024, 252025, 254431, 256067, 262891, 262892, 262897, 262898, 271718, 271895, 271896, 271897, 271899,
+  271900, 271901, 271942, 271943, 272050, 272460, 272466, 272482, 272493, 272546, 272547, 272605, 272607, 272610,
+  272612, 272613, 272615, 272616, 272618, 272620, 272621, 272622, 272623, 272624, 272628, 272629, 272631, 272632,
+  272633, 272635, 272638, 272639, 272644, 272645, 272646, 272651, 272652, 272653, 272654, 272655, 272658, 272659,
+  272660, 272661, 272662, 272664, 272665, 272666, 272667, 272668, 272672, 272673, 272674, 272675, 272676, 272679,
+  272688, 272689, 272690, 272691, 272692, 272714, 272798, 272799, 272832, 272836, 272861, 272862, 272863, 272864,
+  272865, 273354, 273446, 273603, 274216, 274242, 274440, 274441, 274442, 274443, 275712, 276208, 276214, 276215,
+  278512, 278548, 278549, 278550, 278551, 278552, 278553, 278972, 278976, 279495, 280202, 280204, 281655, 286650,
+  287065, 287072, 287073, 287074, 287075, 287076, 287077, 287417, 287961, 288506, 288619, 288998, 289291, 289293,
+  289438,
 }
 local BASE_N = 9469 -- los primeros BASE_N ids son la lista base; el resto son referenciados por el cliente
 local spells = {
@@ -731,12 +735,12 @@ local spells = {
 }
 local BATCH, INTERVAL = 5, 2 -- 5 peticiones cada 2 segundos (~68 min en total)
 local LIST_ID = '1.60.1.70790:9469:691146926' -- identifica la lista base de objetos (el avance sobrevive si solo cambian los ids del final)
-local EXTRA_ID = '184:42729372' -- identifica los objetos anadidos al final
+local EXTRA_ID = '220:45124345' -- identifica los objetos anadidos al final
 local SPELL_ID = '403:191541091' -- identifica la lista de hechizos
 local COLORS = { red = { 0.9, 0.15, 0.15 }, orange = { 1, 0.55, 0 }, yellow = { 1, 0.9, 0.1 }, green = { 0.15, 0.8, 0.2 } }
 local atan2 = math.atan2 or math.atan
 
-local db, ticker, button, refresh -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
+local db, ticker, button, refresh, seenSummary -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
 
 local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
 
@@ -894,6 +898,7 @@ local function showTooltip(self)
   else
     GameTooltip:AddLine('Faltan unos ' .. math.ceil((all - done) / BATCH * INTERVAL / 60) .. ' min', 0.8, 0.8, 0.8)
   end
+  GameTooltip:AddLine('Observado: ' .. seenSummary(), 0.8, 0.8, 0.8, true)
   GameTooltip:AddLine(' ')
   GameTooltip:AddLine('Clic izquierdo: empezar / parar', 0.6, 0.8, 1)
   GameTooltip:AddLine('Clic derecho: estado en el chat', 0.6, 0.8, 1)
@@ -962,7 +967,122 @@ local function createButton()
   refresh()
 end
 
+-- ---------- Observacion pasiva (v5): lo que el juego ya te ensena, anotado en WFUC_ItemCacheDB.seen. No hace ninguna peticion. ----------
+local function safe(f) -- un fallo aqui nunca debe romper el resto del addon
+  return function(...)
+    if not db then return end
+    local ok, err = pcall(f, ...)
+    if not ok then db.errors, db.lastError = (db.errors or 0) + 1, tostring(err) end
+  end
+end
+
+local function idOf(link) return link and tonumber(link:match('item:(%d+)')) end
+
+-- «N123» criatura / «O123» objeto del mundo a partir de un GUID (Tipo-0-servidor-instancia-zona-ID-copia).
+local function guidKey(guid)
+  if not guid then return nil end
+  local kind, _, _, _, _, id = strsplit('-', guid)
+  id = tonumber(id)
+  if not id then return nil end
+  if kind == 'Creature' or kind == 'Vehicle' then return 'N' .. id end
+  if kind == 'GameObject' then return 'O' .. id end
+end
+
+local function where()
+  local _, _, diff, _, _, _, _, map = GetInstanceInfo()
+  return GetRealZoneText() or '', map or 0, diff or 0
+end
+
+local looted = {} -- cuerpos ya contados en esta sesion (un cuerpo cuenta una vez aunque se abra varias)
+local onLoot = safe(function()
+  if not GetLootSourceInfo then return end
+  local bySource = {}
+  for slot = 1, GetNumLootItems() do
+    local id = idOf(GetLootSlotLink(slot))
+    local src = { GetLootSourceInfo(slot) }
+    for k = 1, #src, 2 do
+      local guid = src[k]
+      if guidKey(guid) and not looted[guid] then
+        bySource[guid] = bySource[guid] or {}
+        if id then bySource[guid][#bySource[guid] + 1] = id end
+      end
+    end
+  end
+  local zone, map, diff = where()
+  for guid, list in pairs(bySource) do
+    looted[guid] = true
+    local key = guidKey(guid) .. (diff > 0 and ('@' .. diff) or '')
+    local e = db.seen.loot[key]
+    if not e then e = { k = 0, i = {} } db.seen.loot[key] = e end
+    e.k = e.k + 1
+    e.z, e.m, e.d = zone, map, diff
+    if not e.n then
+      if UnitGUID('target') == guid then e.n = UnitName('target') elseif UnitGUID('mouseover') == guid then e.n = UnitName('mouseover') end
+    end
+    local once = {}
+    for _, id in ipairs(list) do
+      if not once[id] then once[id] = true e.i[id] = (e.i[id] or 0) + 1 end -- en cuantos cuerpos salio
+    end
+  end
+end)
+
+local onMerchant = safe(function()
+  local key = guidKey(UnitGUID('npc'))
+  if not key then return end
+  local rows = {}
+  for i = 1, GetMerchantNumItems() do
+    local id = idOf(GetMerchantItemLink(i))
+    if id then
+      local price, qty, avail, ext
+      if GetMerchantItemInfo then
+        local _
+        _, _, price, qty, avail, _, _, ext = GetMerchantItemInfo(i)
+      elseif C_MerchantFrame and C_MerchantFrame.GetItemInfo then
+        local t = C_MerchantFrame.GetItemInfo(i)
+        if t then price, qty, avail, ext = t.price, t.stackCount, t.numAvailable, t.hasExtendedCost end
+      end
+      local row = { id = id, p = price, q = qty, a = avail }
+      if ext and GetMerchantItemCostInfo then -- coste en objetos o monedas: «i123x5» objeto, «c42x5» moneda
+        local parts = {}
+        for j = 1, (GetMerchantItemCostInfo(i)) do
+          local _, value, link = GetMerchantItemCostItem(i, j)
+          local cost = idOf(link)
+          if cost then parts[#parts + 1] = 'i' .. cost .. 'x' .. value
+          elseif link and link:match('currency:(%d+)') then parts[#parts + 1] = 'c' .. link:match('currency:(%d+)') .. 'x' .. value end
+        end
+        row.c = table.concat(parts, ',')
+      end
+      rows[#rows + 1] = row
+    end
+  end
+  local zone, map = where()
+  db.seen.vendors[key] = { n = UnitName('npc'), z = zone, m = map, t = time(), items = rows }
+end)
+
+local onQuest = safe(function()
+  local id = GetQuestID and GetQuestID()
+  if not id or id == 0 then return end
+  local choices, rewards = {}, {}
+  for i = 1, GetNumQuestChoices() do local x = idOf(GetQuestItemLink('choice', i)) if x then choices[#choices + 1] = x end end
+  for i = 1, GetNumQuestRewards() do local x = idOf(GetQuestItemLink('reward', i)) if x then rewards[#rewards + 1] = x end end
+  local zone, map = where()
+  db.seen.quests[id] = {
+    t = GetTitleText and GetTitleText(), npc = guidKey(UnitGUID('npc')), npcName = UnitName('npc'), z = zone, m = map,
+    c = choices, r = rewards, xp = GetRewardXP and GetRewardXP(), money = GetRewardMoney and GetRewardMoney(),
+  }
+end)
+
+local function countKeys(t) local n = 0 for _ in pairs(t) do n = n + 1 end return n end
+seenSummary = function()
+  local items = 0
+  for _, e in pairs(db.seen.loot) do items = items + countKeys(e.i) end
+  return countKeys(db.seen.loot) .. ' fuentes de botin (' .. items .. ' pares objeto-fuente), ' .. countKeys(db.seen.vendors) .. ' vendedores, ' .. countKeys(db.seen.quests) .. ' misiones'
+end
+
 local ev = CreateFrame('Frame')
+ev:RegisterEvent('LOOT_OPENED')
+ev:RegisterEvent('MERCHANT_SHOW')
+ev:RegisterEvent('QUEST_COMPLETE')
 ev:RegisterEvent('ADDON_LOADED')
 ev:RegisterEvent('PLAYER_LEAVING_WORLD')
 ev:RegisterEvent('PLAYER_REGEN_DISABLED')
@@ -980,11 +1100,16 @@ ev:SetScript('OnEvent', function(_, event, arg1)
       if db.idx > BASE_N + 1 then db.idx = BASE_N + 1 end
     end
     if db.spellList ~= SPELL_ID then db.spellList, db.sidx = SPELL_ID, 1 end
+    db.seen = db.seen or {}
+    db.seen.loot, db.seen.vendors, db.seen.quests = db.seen.loot or {}, db.seen.vendors or {}, db.seen.quests or {} -- lo observado nunca se borra con reset
     createButton()
     ev:UnregisterEvent('ADDON_LOADED')
   elseif event == 'PLAYER_LEAVING_WORLD' then
     if ticker then ticker:Cancel() ticker = nil end
     refresh()
+  elseif event == 'LOOT_OPENED' then onLoot()
+  elseif event == 'MERCHANT_SHOW' then onMerchant()
+  elseif event == 'QUEST_COMPLETE' then onQuest()
   else
     refresh() -- entrar o salir de combate cambia naranja <-> amarillo
   end
@@ -998,5 +1123,6 @@ SlashCmdList.WFUCITEMS = function(arg)
   elseif arg == 'stop' then stop('parado en ' .. db.idx .. ' / ' .. #ids)
   elseif arg == 'reset' then reset()
   elseif arg == 'report' then report()
+  elseif arg == 'seen' then say('observado: ' .. seenSummary() .. (db.errors and (' (errores internos: ' .. db.errors .. ', ultimo: ' .. db.lastError .. ')') or ''))
   else status() end
 end

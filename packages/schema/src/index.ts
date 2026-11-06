@@ -921,7 +921,10 @@ export type ItemLimitCategoryDef = z.infer<typeof ItemLimitCategoryDef>;
 export type Item = z.infer<typeof Item>;
 export type Items = z.infer<typeof Items>;
 
-/** Fuente de un objeto: hoy solo «Fabricado» (hechizo de profesion del cliente que crea el objeto). */
+/**
+ * Fuente de un objeto: «Fabricado» (hechizo de profesion del cliente que crea el objeto, `client-db2`) y, observadas jugando con el addon
+ * de la cache, botin de una criatura u objeto del mundo, vendedor y recompensa de mision (`beta-measured`: son muestras, no tablas oficiales).
+ */
 export const ItemSourceEntry = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("crafted"),
@@ -932,6 +935,43 @@ export const ItemSourceEntry = z.discriminatedUnion("kind", [
     skillEn: z.string(),
     /** Habilidad minima de la profesion para aprender la receta. */
     minSkill: z.number().int(),
+  }),
+  z.object({
+    kind: z.literal("drop"),
+    /** Criatura u objeto del mundo que lo suelta y su id en el servidor. */
+    source: z.enum(["creature", "object"]),
+    npcId: z.number().int(),
+    name: z.string().nullable(),
+    zone: z.string().nullable(),
+    /** Dificultad de la instancia (0 = mundo abierto). */
+    difficulty: z.number().int(),
+    /** Cuerpos abiertos en total y en cuantos salio este objeto. */
+    kills: z.number().int(),
+    drops: z.number().int(),
+    origin: z.literal("beta-measured"),
+  }),
+  z.object({
+    kind: z.literal("vendor"),
+    npcId: z.number().int(),
+    name: z.string().nullable(),
+    zone: z.string().nullable(),
+    /** Precio en cobre (0 si solo cuesta objetos o monedas). */
+    price: z.number().int(),
+    /** Cantidad por compra. */
+    quantity: z.number().int(),
+    /** Coste en objetos o monedas del juego (puntos de honor, marcas...). */
+    cost: z.array(z.object({ type: z.enum(["item", "currency"]), id: z.number().int(), count: z.number().int(), name: z.string().nullable() })),
+    origin: z.literal("beta-measured"),
+  }),
+  z.object({
+    kind: z.literal("quest"),
+    questId: z.number().int(),
+    title: z.string().nullable(),
+    /** true = una de varias a elegir; false = recompensa fija. */
+    choice: z.boolean(),
+    giver: z.string().nullable(),
+    zone: z.string().nullable(),
+    origin: z.literal("beta-measured"),
   }),
 ]);
 export const ItemSources = z.object({

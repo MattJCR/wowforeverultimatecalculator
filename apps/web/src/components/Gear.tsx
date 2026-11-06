@@ -426,8 +426,10 @@ function SlotPanel({
   const [onlyWearable, setOnlyWearable] = useState(true);
   // Tipo de objeto (tela, cuero, malla, placas, tipo de arma…); vacío = todos
   const [itemType, setItemType] = useState("");
-  // Fuente: vacío = todas; «crafted» = fabricados por una profesión
+  // Fuente: vacío = todas; «crafted» = fabricados por una profesión; «drop», «vendor», «quest» = observados jugando
   const [source, setSource] = useState("");
+  // Clases de fuente que existen en los datos (el botín, los vendedores y las misiones solo salen de lo observado jugando)
+  const sourceKinds = useMemo(() => new Set([...data.sources.values()].flatMap((list) => list.map((e) => e.kind))), [data.sources]);
   const [limit, setLimit] = useState(60);
   useEffect(() => setLimit(60), [slot, query, minQuality, onlyWearable, itemType, source]);
   useEffect(() => { setItemType(""); setSource(""); }, [slot]);
@@ -541,6 +543,9 @@ function SlotPanel({
             <select value={source} onChange={(e) => setSource(e.target.value)}>
               <option value="">{tr("todas")}</option>
               <option value="crafted">{tr("Fabricado")}</option>
+              {sourceKinds.has("drop") && <option value="drop">{tr("Botín")}</option>}
+              {sourceKinds.has("vendor") && <option value="vendor">{tr("Vendedor")}</option>}
+              {sourceKinds.has("quest") && <option value="quest">{tr("Misión")}</option>}
             </select>
           </label>
         )}

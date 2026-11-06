@@ -77,9 +77,16 @@ APPEARANCE_TABLES=(
   # Los usa tools/model (modelos de personaje); se olvidaron en la lista hasta el parche 70532
   ChrModelMaterial ChrModelTextureLayer
 )
+# Fuentes de objetos (LOOT=1): instancias, jefes, mapas, criaturas, costes de vendedor, reagentes de recetas, facciones y monedas.
+# El cliente NO trae el botin por jefe (no existen las tablas Journal*): eso viene del addon (observado) y de la lectura de addons (contraste).
+SOURCE_TABLES=(
+  DungeonEncounter LFGDungeons Map AreaTable Creature CreatureDifficulty ItemExtendedCost SpellReagents
+  Faction FactionTemplate CurrencyTypes SkillLine SkillLineAbility
+)
 TABLES=("$@")
 if [ ${#TABLES[@]} -eq 0 ]; then
   if [ "${APPEARANCE:-0}" = "1" ]; then TABLES=("${APPEARANCE_TABLES[@]}")
+  elif [ "${LOOT:-0}" = "1" ]; then TABLES=("${SOURCE_TABLES[@]}")
   elif [ "${ITEMS:-0}" = "1" ]; then TABLES=("${ITEM_TABLES[@]}"); else TABLES=("${DEFAULT_TABLES[@]}"); fi
 fi
 

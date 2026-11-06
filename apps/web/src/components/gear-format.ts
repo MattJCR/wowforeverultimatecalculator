@@ -20,12 +20,40 @@ export const effectLabel = (e: { spellId: number; text: string; name: string }):
   const en = isEnglish() ? spellEn(e.spellId) : null;
   return en?.description || e.text || en?.name || e.name || tr("hechizo {id}", { id: e.spellId });
 };
-/** Líneas de la tarjeta de un objeto con su fuente (hoy solo la profesión que lo fabrica). */
+/** Cobre → «1g 20s 5c». */
+export const moneyText = (copper: number): string => {
+  const parts = [Math.floor(copper / 10000) && `${Math.floor(copper / 10000)}g`, Math.floor((copper % 10000) / 100) && `${Math.floor((copper % 10000) / 100)}s`, copper % 100 && `${copper % 100}c`];
+  return parts.filter(Boolean).join(" ") || "0c";
+};
+/** Cuántas fuentes observadas de cada clase se enseñan en la tarjeta (las demás se resumen). */
+const MAX_OBSERVED = 3;
+
+/**
+ * Líneas de la tarjeta de un objeto con su fuente: la profesión que lo fabrica (cliente) y, observado jugando, botín, vendedores y
+ * misiones. Lo observado es una muestra (cuerpos abiertos), no una tabla oficial, y se rotula así.
+ */
 export function sourceLines(entries: ItemSourceEntry[]): string[] {
   const out: string[] = [];
+  const where = (zone: string | null): string => (zone ? ` (${zone})` : "");
+  const drops = entries.filter((s): s is Extract<ItemSourceEntry, { kind: "drop" }> => s.kind === "drop").sort((a, b) => b.drops / Math.max(b.kills, 1) - a.drops / Math.max(a.kills, 1) || b.kills - a.kills);
+  const vendors = entries.filter((s): s is Extract<ItemSourceEntry, { kind: "vendor" }> => s.kind === "vendor");
+  const quests = entries.filter((s): s is Extract<ItemSourceEntry, { kind: "quest" }> => s.kind === "quest");
   for (const s of entries) {
-    out.push(tr("Fabricado: {skill} ({n})", { skill: isEnglish() ? s.skillEn : s.skill, n: s.minSkill }));
+    if (s.kind === "crafted") out.push(tr("Fabricado: {skill} ({n})", { skill: isEnglish() ? s.skillEn : s.skill, n: s.minSkill }));
   }
+  for (const s of drops.slice(0, MAX_OBSERVED)) {
+    out.push(tr("Botín: {name}{where}: salió en {drops} de {kills} (observado)", { name: s.name ?? tr(s.source === "creature" ? "criatura {id}" : "objeto del mundo {id}", { id: s.npcId }), where: where(s.zone), drops: s.drops, kills: s.kills }));
+  }
+  if (drops.length > MAX_OBSERVED) out.push(tr("…y {n} fuentes de botín más", { n: drops.length - MAX_OBSERVED }));
+  for (const s of vendors.slice(0, MAX_OBSERVED)) {
+    const price = [s.price > 0 ? moneyText(s.price) : "", ...s.cost.map((c) => `${c.count} × ${c.name ?? c.id}`)].filter(Boolean).join(" + ") || tr("gratis");
+    out.push(tr("Vendedor: {name}{where}: {price} (observado)", { name: s.name ?? tr("vendedor {id}", { id: s.npcId }), where: where(s.zone), price }));
+  }
+  if (vendors.length > MAX_OBSERVED) out.push(tr("…y {n} vendedores más", { n: vendors.length - MAX_OBSERVED }));
+  for (const s of quests.slice(0, MAX_OBSERVED)) {
+    out.push(tr("Misión: {title} ({kind}) (observado)", { title: s.title ?? tr("misión {id}", { id: s.questId }), kind: tr(s.choice ? "a elegir" : "recompensa") }));
+  }
+  if (quests.length > MAX_OBSERVED) out.push(tr("…y {n} misiones más", { n: quests.length - MAX_OBSERVED }));
   return out;
 }
 

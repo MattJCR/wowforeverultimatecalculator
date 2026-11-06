@@ -52,6 +52,9 @@ const referencedItems = new Set([
   ...column("ItemSet", /^ItemID\[/), ...column("ItemModifiedAppearance", /^ItemID$/), ...column("ItemXItemEffect", /^ItemID$/), ...column("ItemSparse", /^OppositeFactionItemID$/),
   ...spellEffects.rows.filter((r) => Number(r[eEff]) === 24).map((r) => Number(r[eItem])).filter((n) => n > 0),
 ]);
+// Objetos que aparecen en tablas de botín leídas de otros addons (tools/extract/read-loot-addons.mjs), si se han leído.
+const lootIds = path.join(ROOT, "data", "external", "loot-addons", "item-ids.json");
+if (fs.existsSync(lootIds)) for (const x of JSON.parse(fs.readFileSync(lootIds, "utf8"))) referencedItems.add(x);
 const inBase = new Set(base);
 const itemExtras = [...referencedItems].filter((x) => !inBase.has(x) && !have.has(x)).sort((a, b) => a - b);
 const list = [...base, ...itemExtras];
@@ -76,12 +79,13 @@ const extraId = `${itemExtras.length}:${sum(itemExtras)}`;
 const spellId = `${spells.length}:${sum(spells)}`;
 
 // Las rutas de textura van con «/» (WoW las acepta) para no depender de escapes de Lua.
-const lua = `-- WFUC_ItemCache v4: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
+const lua = `-- WFUC_ItemCache v5: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
 -- Objetos: los ${base.length} de la lista base + ${itemExtras.length} que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
+-- Ademas anota, sin pedir nada, lo que el juego ya te ensena: botin por criatura/objeto (cuerpos y veces que salio cada objeto), vendedores con sus costes y recompensas de mision (WFUC_ItemCacheDB.seen).
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
 -- Boton en el minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
 -- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
--- Tambien: /wfucitems start | stop | status | report | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
+-- Tambien: /wfucitems start | stop | status | report | seen | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
 local ids = {
 ${fmt(list)}
@@ -97,7 +101,7 @@ local SPELL_ID = '${spellId}' -- identifica la lista de hechizos
 local COLORS = { red = { 0.9, 0.15, 0.15 }, orange = { 1, 0.55, 0 }, yellow = { 1, 0.9, 0.1 }, green = { 0.15, 0.8, 0.2 } }
 local atan2 = math.atan2 or math.atan
 
-local db, ticker, button, refresh -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
+local db, ticker, button, refresh, seenSummary -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
 
 local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
 
@@ -255,6 +259,7 @@ local function showTooltip(self)
   else
     GameTooltip:AddLine('Faltan unos ' .. math.ceil((all - done) / BATCH * INTERVAL / 60) .. ' min', 0.8, 0.8, 0.8)
   end
+  GameTooltip:AddLine('Observado: ' .. seenSummary(), 0.8, 0.8, 0.8, true)
   GameTooltip:AddLine(' ')
   GameTooltip:AddLine('Clic izquierdo: empezar / parar', 0.6, 0.8, 1)
   GameTooltip:AddLine('Clic derecho: estado en el chat', 0.6, 0.8, 1)
@@ -323,7 +328,122 @@ local function createButton()
   refresh()
 end
 
+-- ---------- Observacion pasiva (v5): lo que el juego ya te ensena, anotado en WFUC_ItemCacheDB.seen. No hace ninguna peticion. ----------
+local function safe(f) -- un fallo aqui nunca debe romper el resto del addon
+  return function(...)
+    if not db then return end
+    local ok, err = pcall(f, ...)
+    if not ok then db.errors, db.lastError = (db.errors or 0) + 1, tostring(err) end
+  end
+end
+
+local function idOf(link) return link and tonumber(link:match('item:(%d+)')) end
+
+-- «N123» criatura / «O123» objeto del mundo a partir de un GUID (Tipo-0-servidor-instancia-zona-ID-copia).
+local function guidKey(guid)
+  if not guid then return nil end
+  local kind, _, _, _, _, id = strsplit('-', guid)
+  id = tonumber(id)
+  if not id then return nil end
+  if kind == 'Creature' or kind == 'Vehicle' then return 'N' .. id end
+  if kind == 'GameObject' then return 'O' .. id end
+end
+
+local function where()
+  local _, _, diff, _, _, _, _, map = GetInstanceInfo()
+  return GetRealZoneText() or '', map or 0, diff or 0
+end
+
+local looted = {} -- cuerpos ya contados en esta sesion (un cuerpo cuenta una vez aunque se abra varias)
+local onLoot = safe(function()
+  if not GetLootSourceInfo then return end
+  local bySource = {}
+  for slot = 1, GetNumLootItems() do
+    local id = idOf(GetLootSlotLink(slot))
+    local src = { GetLootSourceInfo(slot) }
+    for k = 1, #src, 2 do
+      local guid = src[k]
+      if guidKey(guid) and not looted[guid] then
+        bySource[guid] = bySource[guid] or {}
+        if id then bySource[guid][#bySource[guid] + 1] = id end
+      end
+    end
+  end
+  local zone, map, diff = where()
+  for guid, list in pairs(bySource) do
+    looted[guid] = true
+    local key = guidKey(guid) .. (diff > 0 and ('@' .. diff) or '')
+    local e = db.seen.loot[key]
+    if not e then e = { k = 0, i = {} } db.seen.loot[key] = e end
+    e.k = e.k + 1
+    e.z, e.m, e.d = zone, map, diff
+    if not e.n then
+      if UnitGUID('target') == guid then e.n = UnitName('target') elseif UnitGUID('mouseover') == guid then e.n = UnitName('mouseover') end
+    end
+    local once = {}
+    for _, id in ipairs(list) do
+      if not once[id] then once[id] = true e.i[id] = (e.i[id] or 0) + 1 end -- en cuantos cuerpos salio
+    end
+  end
+end)
+
+local onMerchant = safe(function()
+  local key = guidKey(UnitGUID('npc'))
+  if not key then return end
+  local rows = {}
+  for i = 1, GetMerchantNumItems() do
+    local id = idOf(GetMerchantItemLink(i))
+    if id then
+      local price, qty, avail, ext
+      if GetMerchantItemInfo then
+        local _
+        _, _, price, qty, avail, _, _, ext = GetMerchantItemInfo(i)
+      elseif C_MerchantFrame and C_MerchantFrame.GetItemInfo then
+        local t = C_MerchantFrame.GetItemInfo(i)
+        if t then price, qty, avail, ext = t.price, t.stackCount, t.numAvailable, t.hasExtendedCost end
+      end
+      local row = { id = id, p = price, q = qty, a = avail }
+      if ext and GetMerchantItemCostInfo then -- coste en objetos o monedas: «i123x5» objeto, «c42x5» moneda
+        local parts = {}
+        for j = 1, (GetMerchantItemCostInfo(i)) do
+          local _, value, link = GetMerchantItemCostItem(i, j)
+          local cost = idOf(link)
+          if cost then parts[#parts + 1] = 'i' .. cost .. 'x' .. value
+          elseif link and link:match('currency:(%d+)') then parts[#parts + 1] = 'c' .. link:match('currency:(%d+)') .. 'x' .. value end
+        end
+        row.c = table.concat(parts, ',')
+      end
+      rows[#rows + 1] = row
+    end
+  end
+  local zone, map = where()
+  db.seen.vendors[key] = { n = UnitName('npc'), z = zone, m = map, t = time(), items = rows }
+end)
+
+local onQuest = safe(function()
+  local id = GetQuestID and GetQuestID()
+  if not id or id == 0 then return end
+  local choices, rewards = {}, {}
+  for i = 1, GetNumQuestChoices() do local x = idOf(GetQuestItemLink('choice', i)) if x then choices[#choices + 1] = x end end
+  for i = 1, GetNumQuestRewards() do local x = idOf(GetQuestItemLink('reward', i)) if x then rewards[#rewards + 1] = x end end
+  local zone, map = where()
+  db.seen.quests[id] = {
+    t = GetTitleText and GetTitleText(), npc = guidKey(UnitGUID('npc')), npcName = UnitName('npc'), z = zone, m = map,
+    c = choices, r = rewards, xp = GetRewardXP and GetRewardXP(), money = GetRewardMoney and GetRewardMoney(),
+  }
+end)
+
+local function countKeys(t) local n = 0 for _ in pairs(t) do n = n + 1 end return n end
+seenSummary = function()
+  local items = 0
+  for _, e in pairs(db.seen.loot) do items = items + countKeys(e.i) end
+  return countKeys(db.seen.loot) .. ' fuentes de botin (' .. items .. ' pares objeto-fuente), ' .. countKeys(db.seen.vendors) .. ' vendedores, ' .. countKeys(db.seen.quests) .. ' misiones'
+end
+
 local ev = CreateFrame('Frame')
+ev:RegisterEvent('LOOT_OPENED')
+ev:RegisterEvent('MERCHANT_SHOW')
+ev:RegisterEvent('QUEST_COMPLETE')
 ev:RegisterEvent('ADDON_LOADED')
 ev:RegisterEvent('PLAYER_LEAVING_WORLD')
 ev:RegisterEvent('PLAYER_REGEN_DISABLED')
@@ -341,11 +461,16 @@ ev:SetScript('OnEvent', function(_, event, arg1)
       if db.idx > BASE_N + 1 then db.idx = BASE_N + 1 end
     end
     if db.spellList ~= SPELL_ID then db.spellList, db.sidx = SPELL_ID, 1 end
+    db.seen = db.seen or {}
+    db.seen.loot, db.seen.vendors, db.seen.quests = db.seen.loot or {}, db.seen.vendors or {}, db.seen.quests or {} -- lo observado nunca se borra con reset
     createButton()
     ev:UnregisterEvent('ADDON_LOADED')
   elseif event == 'PLAYER_LEAVING_WORLD' then
     if ticker then ticker:Cancel() ticker = nil end
     refresh()
+  elseif event == 'LOOT_OPENED' then onLoot()
+  elseif event == 'MERCHANT_SHOW' then onMerchant()
+  elseif event == 'QUEST_COMPLETE' then onQuest()
   else
     refresh() -- entrar o salir de combate cambia naranja <-> amarillo
   end
@@ -359,10 +484,11 @@ SlashCmdList.WFUCITEMS = function(arg)
   elseif arg == 'stop' then stop('parado en ' .. db.idx .. ' / ' .. #ids)
   elseif arg == 'reset' then reset()
   elseif arg == 'report' then report()
+  elseif arg == 'seen' then say('observado: ' .. seenSummary() .. (db.errors and (' (errores internos: ' .. db.errors .. ', ultimo: ' .. db.lastError .. ')') or ''))
   else status() end
 end
 `;
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.lua"), lua);
-fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start)\n## Author: local\n## Version: 4\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
+fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves\n## Author: local\n## Version: 5\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
 console.log(`${base.length} objetos de la lista base + ${itemExtras.length} referenciados + ${spells.length} hechizos (≈ ${minutes} min) → ${path.relative(ROOT, OUT)}`);
