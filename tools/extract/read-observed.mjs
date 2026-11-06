@@ -1,7 +1,7 @@
 // Lee (solo lectura) lo que WFUC_ItemCache ha anotado jugando —botín por criatura/objeto, vendedores y recompensas de misión—
-// de WTF\Account\*\SavedVariables\WFUC_ItemCacheDB.lua y lo funde en data/observed/sources.json (datos NUESTROS, procedencia `beta-measured`).
+// de WTF\Account\*\SavedVariables\WFUC_ItemCache.lua y lo funde en data/observed/sources.json (datos NUESTROS, procedencia `beta-measured`).
 // También deja el informe de objetos/hechizos que el servidor no devolvió en data/observed/cache-report.json.
-// Uso: node tools/extract/read-observed.mjs [ruta a WFUC_ItemCacheDB.lua ...]      (por defecto busca en el cliente)
+// Uso: node tools/extract/read-observed.mjs [ruta a WFUC_ItemCache.lua ...]      (por defecto busca en el cliente)
 // Cada ejecución FUNDE con lo ya guardado (el addon acumula, así que se toma el máximo por cuenta), no pisa observaciones antiguas.
 import fs from "node:fs";
 import path from "node:path";
@@ -16,14 +16,14 @@ function findFiles() {
   const out = [];
   if (!fs.existsSync(WTF)) return out;
   for (const acc of fs.readdirSync(WTF)) {
-    const p = path.join(WTF, acc, "SavedVariables", "WFUC_ItemCacheDB.lua");
+    const p = path.join(WTF, acc, "SavedVariables", "WFUC_ItemCache.lua");
     if (fs.existsSync(p)) out.push(p);
   }
   return out;
 }
 
 const files = process.argv.length > 2 ? process.argv.slice(2) : findFiles();
-if (!files.length) { console.log("No hay WFUC_ItemCacheDB.lua (se escribe al salir o recargar con el addon puesto)."); process.exit(0); }
+if (!files.length) { console.log("No hay WFUC_ItemCache.lua (se escribe al salir o recargar con el addon puesto)."); process.exit(0); }
 
 const prevPath = path.join(OUT, "sources.json");
 const store = fs.existsSync(prevPath) ? JSON.parse(fs.readFileSync(prevPath, "utf8")) : { loot: {}, vendors: {}, quests: {} };

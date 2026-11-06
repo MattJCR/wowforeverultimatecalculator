@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "build": "1.60.1.70790",
   "locale": "esES",
-  "generatedAt": "2026-11-05T16:21:58.425Z",
+  "generatedAt": "2026-11-06T09:17:21.128Z",
   "hotfixesApplied": true,
   "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
   "classes": [
@@ -307,7 +307,7 @@
   },
   "buffs": {
     "file": "buffs.json",
-    "sha256": "398075ed99e4ed891c5d01705050caf5c6146cdcb56a3b95e595d9b6eb0139e4",
+    "sha256": "1c02b7c3beafa4e229ca3ca7f5148ac07d5ce8f148ab6cb2c1c14e5110956c27",
     "count": 311
   },
   "randomSuffixes": {
@@ -317,9 +317,9 @@
   },
   "items": {
     "file": "items.json",
-    "sha256": "2a6a432b4be18701a2ccf26e9a12c5270a432a84f9d5caba92a07cb4eee7e0b5",
-    "itemCount": 12641,
-    "unavailableCount": 6364
+    "sha256": "a11be2594d39fea99cb262639a98f8425cefdf255013c004125465751e2108d2",
+    "itemCount": 12656,
+    "unavailableCount": 6349
   },
   "equipRules": {
     "file": "equip-rules.json",
@@ -343,7 +343,7 @@
   },
   "english": {
     "file": "i18n/en.json",
-    "sha256": "e1d5228a9211a8eeb4595447da9dd7d621618b44492bbce2633daed664430e73"
+    "sha256": "dbab3955da4895bb61206e468eb4af62541813337588fcb9f8b57e4f2f5a09d4"
   },
   "unassigned": {
     "file": "unassigned.json",
@@ -390,7 +390,7 @@
     },
     {
       "table": "Item",
-      "sha256": "cc9988b00710a32066657470c32484e9a7e0c683eba512278940678c574fefce"
+      "sha256": "4f83d555fee0d38139e4e2c0a2437a8cab0e62a3fd739b58eef81b6832622b76"
     },
     {
       "table": "ItemArmorQuality",
@@ -426,7 +426,7 @@
     },
     {
       "table": "ItemEffect",
-      "sha256": "f8842c1e6515c4516100d47ab7853aac6ef6f2ad881771e6ae8f06310ba242f3"
+      "sha256": "be03021c112ed36cbef8053a91676254af5ed958d51d8dc94bc09cb0826f7641"
     },
     {
       "table": "ItemLimitCategory",
@@ -442,7 +442,7 @@
     },
     {
       "table": "ItemSparse",
-      "sha256": "3cb71d2c425fb5eeac1eeaff7de5257b0e9d9f7266579a1025859afbfa00e946"
+      "sha256": "d69ae4939f3f6ab6d041490b40dd82e65275d983e6473e9e421145a80b3bad11"
     },
     {
       "table": "ItemXItemEffect",
@@ -470,11 +470,11 @@
     },
     {
       "table": "Spell",
-      "sha256": "e8e54e3cdf7d49a8571bda394487b0d060ee0922ca901522ace775893a7f8d23"
+      "sha256": "88acf28e9fd5d73343872f05ac235a447cbb2fa45e5f74bb6014c2119d4fa341"
     },
     {
       "table": "SpellAuraOptions",
-      "sha256": "f4887f3b0dd41f3a37dfba81dbca368b4c92b451f00ead802447eb25fdc2dbc7"
+      "sha256": "33bc33170d582be1b6b37c1dde90b34cecb9687699822a1bca8bb39e38960273"
     },
     {
       "table": "SpellCastTimes",
@@ -502,7 +502,7 @@
     },
     {
       "table": "SpellEffect",
-      "sha256": "71e6b265ee9ce6932e89fb741a5c80958c0e0b134d0174e44e012f0b2c4f2dfa"
+      "sha256": "f9336d91ec3562a97e32d54003edfc30728695e570bda5e4c626bc9e1e62fa06"
     },
     {
       "table": "SpellEquippedItems",
@@ -514,15 +514,15 @@
     },
     {
       "table": "SpellLevels",
-      "sha256": "00f4df70f539269f0d0267345eded5730d393a84db7e11492a69bdd19039529e"
+      "sha256": "c165965f3b72ad9bc8411abea5617a2e9bf6022452509ed1ab0086902c4a3e43"
     },
     {
       "table": "SpellMisc",
-      "sha256": "9f026def18218b78fd7f2a610083d9c48ab9a0bdc1ef91ec0bece3d07d17cc32"
+      "sha256": "59531788806071312cc5c9446fc87d7db968e3941415f14c7f1e9f3f14c851d8"
     },
     {
       "table": "SpellName",
-      "sha256": "4a3783e2bf7d0ecba2b476597cf8b239d630594ce0a487cff87f2ad2e647cfc7"
+      "sha256": "d425b8cb2c158d0bf5e4a16c5c3afa32a8c4afda890f902266309e8241637f2e"
     },
     {
       "table": "SpellPower",
@@ -542,7 +542,7 @@
     },
     {
       "table": "SpellTargetRestrictions",
-      "sha256": "f8a5a3946d43c6f599fb46e10cd034f0d6b00f6d1112d4d0fce4108925760edf"
+      "sha256": "e5550efed632c81f4c88231138df2a380b51b604aeab8a7cc899113ae80e49cf"
     },
     {
       "table": "SpellXDescriptionVariables",

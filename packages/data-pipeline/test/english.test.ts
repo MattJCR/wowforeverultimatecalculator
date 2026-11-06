@@ -112,9 +112,9 @@ describe.skipIf(!ready)("textos en inglés (del juego, contrastados con las cifr
     const items = Items.parse(read("items.json"));
     const unavailable = new Set(items.unavailable.map((u) => u.id));
     const missing = items.items.filter((i) => !i.placeholder && !unavailable.has(i.id) && !en.items[i.id]).map((i) => `${i.id} ${i.name}`);
-    // PENDIENTE (5/11, 70790): 8 objetos que el cliente trae por primera vez en la caché esES del 5/11; la caché enUS sigue siendo la del 4/11 y no los tiene.
+    // PENDIENTE (6/11, 70790): 8 objetos del 5/11 y 15 que llegan al pedirlos con el addon de la caché (esES del 6/11); la caché enUS sigue siendo la del 4/11 y no los tiene.
     // Se resuelve al entrar al juego en inglés y volver a leer las tablas inglesas; entonces vaciar esta lista.
-    const PENDING_ENGLISH_NAME = ["6802 Espada de Augurio", "6803 Caña profética", "10711 Collar de sangre de dragón", "264501 Espada cielonata ancestral", "279882 Cinturón de guerra trol oxidado", "279883 Puños de motín", "279884 Sudario de los Mares del Sur", "279930 Yelmo de Videntesal"];
+    const PENDING_ENGLISH_NAME = ["6802 Espada de Augurio", "6803 Caña profética", "9527 Vara de tramoyista de hechizos", "9531 Espaldares de pizarra", "9533 Anillo de fraternidad masona", "9534 Celada de hermandad de ingeniero", "10711 Collar de sangre de dragón", "10823 Espada del vencedor", "10824 Talismán Resplandor de Ámbar", "264501 Espada cielonata ancestral", "270081 Anillo purificado", "270098 Hombreras empapadas", "270099 Capucha de magister", "274952 Gabbar de Jom-jom", "274959 Cuernos de Farholde", "274962 Perniles de piel de cocodrilo", "278567 Caperuza de Stromgarde", "279882 Cinturón de guerra trol oxidado", "279883 Puños de motín", "279884 Sudario de los Mares del Sur", "279930 Yelmo de Videntesal", "280505 Chaqueta de cuero vieja", "287072 Colombroño de Filosusurro"];
     expect(missing).toEqual(PENDING_ENGLISH_NAME);
   });
 

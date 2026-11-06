@@ -105,9 +105,9 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     // El parche 70658 reequilibró 6 objetos (nivel de objeto 19-20 → 18, calidad azul → verde, menos estadísticas y daño): la copia
     // de la comunidad es anterior y trae las cifras viejas. Manda el cliente; cuando la comunidad se actualice, vaciar esta lista.
     const REBALANCED_IN_70658 = new Set([269716, 269717, 269742, 277286, 277288, 277289]);
-    // Hotfix del 4/11 (visto en la caché del 5/11, 70790): 10 armas arrojadizas de nivel bajo (2870xx) ensanchan su rango de daño (p. ej. Cuchillo dentado 15-16 → 10-20, mismo DPS):
+    // Hotfix del 4/11 (visto en la caché del 5/11 y del 6/11, 70790): 12 armas arrojadizas de nivel bajo (2870xx) ensanchan su rango de daño (p. ej. Cuchillo dentado 15-16 → 10-20, mismo DPS):
     // la copia de la comunidad es anterior y trae el rango estrecho. Manda el cliente; cuando la comunidad se actualice, vaciar esta lista.
-    const REBALANCED_IN_70790 = new Set([287059, 287060, 287061, 287062, 287063, 287064, 287066, 287067, 287069, 287070]);
+    const REBALANCED_IN_70790 = new Set([287059, 287060, 287061, 287062, 287063, 287064, 287066, 287067, 287068, 287069, 287070, 287071]);
     const common = db.items.filter((w) => !REBALANCED_IN_70658.has(w.id) && !REBALANCED_IN_70790.has(w.id) && client.items.some((i) => i.id === w.id));
     const byId = new Map(client.items.map((i) => [i.id, i]));
     const so = (w: (typeof db.items)[number]) => Object.values(w.scalingOptions ?? {})[0];
