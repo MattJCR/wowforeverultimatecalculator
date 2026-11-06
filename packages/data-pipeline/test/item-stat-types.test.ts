@@ -51,7 +51,7 @@ describe.skipIf(!existsSync(join(RAW, "GlobalStrings.csv")) || !existsSync(join(
     expect(stat(21102, 121)?.key).toBe("frost-penetration"); // …: Escarcha
     expect(stat(10696, 127)?.key).toBe("attack-power-vs-demon"); // Espada Felbane
     expect(stat(23078, 128)?.key).toBe("attack-power-vs-undead"); // Guanteletes de Asesino de no-muertos
-    expect(stat(282778, 129)?.key).toBe("attack-power-vs-dragonkin"); // Marca del Vuelo Rojo
+    // 129 (poder de ataque contra dragonantes): su único ejemplo, la Marca del Vuelo Rojo (282778), lo retiró el servidor el 6/11; el tipo sigue confirmado por el orden de los textos
     expect(stat(1465, 131)?.key).toBe("attack-power-vs-beast"); // Aterratigres
     expect(stat(7506, 132)?.key).toBe("attack-power-vs-mechanical"); // Mando universal gnómico
     expect(stat(23207, 135)?.key).toBe("spell-damage-vs-demon"); // Marca del Campeón (hechizos)

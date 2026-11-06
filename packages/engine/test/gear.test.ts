@@ -52,7 +52,7 @@ describe.skipIf(!has)("equipo: reglas para equipar y sumas (cliente 1.60.1.70790
 
   // Peto de alabastro (placas, nivel 52), Toga imperial roja (tela, 51), Hoja de Hanna (espada 2M, 59), Aterratigres (daga, 33),
   // Égida de Ventormenta (escudo, 49), Ojo de Adaegus (anillo único, 48), Varita agostadora (30), Tratado sobre Gracia (libro, 60)
-  const PLATE_CHEST = 8312, CLOTH_ROBE = 8252, TWO_HAND_SWORD = 2801, DAGGER = 1465, SHIELD = 1203, UNIQUE_RING = 5266, WAND = 5213, LIBRAM = 22402;
+  const PLATE_CHEST = 8312, CLOTH_ROBE = 1716, TWO_HAND_SWORD = 2877, DAGGER = 1465, SHIELD = 1203, UNIQUE_RING = 5266, WAND = 5213, LIBRAM = 22402;
 
   it("competencias de una clase: el mago solo lleva tela y no usa dos armas; el pícaro sí", () => {
     const rules = EquipRules.parse(json("equip-rules.json"));

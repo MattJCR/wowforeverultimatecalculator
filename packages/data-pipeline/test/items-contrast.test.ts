@@ -37,7 +37,7 @@ describe.skipIf(!ready)("objetos frente a las lecturas del juego (solo contraste
   const byId = new Map(data.items.map((i) => [i.id, i]));
 
   it("cubre los equipables con ItemSparse y deja aparte los que el cliente no trae", () => {
-    expect(data.items.length).toBeGreaterThan(12000);
+    expect(data.items.length).toBeGreaterThan(11000); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     expect(data.unavailable.length).toBeGreaterThan(6000);
     expect(data.unavailable.every((u) => !byId.has(u.id))).toBe(true);
   });
@@ -140,13 +140,13 @@ describe.skipIf(!ready)("conjuntos frente a las lecturas del juego (solo contras
       if (!set || !item) continue;
       groups.set(set, (groups.get(set) ?? new Set()).add(item.itemSetId));
     }
-    expect(groups.size).toBeGreaterThan(250);
+    expect(groups.size).toBeGreaterThan(180); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     expect([...groups].filter(([, ours]) => ours.size > 1)).toEqual([]);
   });
 
   it("tener o no conjunto coincide en TODOS los objetos que el cliente y las lecturas comparten, y todos los conjuntos con piezas tienen bonos", () => {
     const shared = [...setOf].filter(([id]) => mine.has(id));
-    expect(shared.length).toBeGreaterThan(12000);
+    expect(shared.length).toBeGreaterThan(11000); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     expect(shared.filter(([id, set]) => !!set !== !!mine.get(id)!.itemSetId).map(([id]) => id)).toEqual([]);
     const withBonuses = new Set(data.sets.filter((s) => s.bonuses.length > 0).map((s) => s.id));
     const noBonus = [...new Set(data.items.filter((i) => i.itemSetId !== null && !withBonuses.has(i.itemSetId)).map((i) => i.itemSetId))];

@@ -6,6 +6,7 @@ import { openRawTables } from "../src/csv.js";
 import { CombatRatings, Enchants, Items, RandomSuffixes } from "../src/model.js";
 import { buildItems } from "../src/items.js";
 import { SpellTables } from "../src/spell-tables.js";
+import { loadRetired } from "../src/server-retired.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "../src/wowsims.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -23,7 +24,8 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
   const suffixNames = (JSON.parse(readFileSync(join(WS, "../../i18n/suffixes-esES.json"), "utf8")) as { names: Record<string, string> }).names;
   const suffixes = RandomSuffixes.parse(buildRandomSuffixes(db, BUILD, suffixNames));
   const client = Items.parse(buildItems(raw, BUILD, new SpellTables(raw)));
-  const merged = Items.parse(applyWowsims(client, db).items);
+  const retired = loadRetired(root, BUILD, new Set(raw.table("ItemSparse").map((r) => Number(r.ID))));
+  const merged = Items.parse(applyWowsims(client, db, {}, retired).items);
 
   it("los 160 sufijos aleatorios tienen nombre en español (traducción propia) y ninguno queda en inglés", () => {
     expect(suffixes.suffixes).toHaveLength(160);
@@ -34,7 +36,7 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
 
   it("los objetos de la comunidad con nombre en inglés llevan traducción propia (se quita cuando el cliente los traiga)", () => {
     const names = (JSON.parse(readFileSync(join(WS, "../../i18n/esES-overrides.json"), "utf8")) as { names: Record<string, string> }).names;
-    const translated = Items.parse(applyWowsims(client, db, names).items).items.filter((i) => i.provenance === "community");
+    const translated = Items.parse(applyWowsims(client, db, names, retired).items).items.filter((i) => i.provenance === "community");
     expect(translated.filter((i) => i.textOrigin === "untranslated").map((i) => i.name)).toEqual([]);
     expect(translated.find((i) => i.id === 285353)).toMatchObject({ name: "Mochila de explorador eterno", textOrigin: "translated-by-us" });
   });
@@ -82,23 +84,27 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
 
   it("objetos nuevos de la comunidad: solo los que el cliente no trae, marcados community y sin traducir", () => {
     const extra = merged.items.filter((i) => i.provenance === "community");
-    expect(extra.length).toBeGreaterThan(5);
+    expect(extra.length).toBeGreaterThan(0);
     const clientIds = new Set(client.items.map((i) => i.id));
     expect(extra.every((i) => !clientIds.has(i.id) && i.textOrigin === "untranslated")).toBe(true);
-    // El Muro de los Muertos (1979) era el único que el cliente listaba sin datos y la comunidad traía; el hotfix del 22/10 ya lo trae el cliente
+    // Retirados (6/11): el servidor no devolvió el Muro de los Muertos (1979) al pedirlo con el addon de la caché; no entra ni del cliente ni de la comunidad
     expect(extra.map((i) => i.id)).not.toContain(1979);
-    expect(client.items.some((i) => i.id === 1979)).toBe(true);
+    expect(retired.has(1979)).toBe(true);
+    expect(merged.items.some((i) => i.id === 1979)).toBe(false);
+    // y ninguno de los retirados vuelve por la copia de la comunidad
+    expect(extra.filter((i) => retired.has(i.id))).toEqual([]);
     // lo del cliente no se toca
     expect(merged.items.filter((i) => i.provenance === "client-db2")).toHaveLength(client.items.length);
   });
 
-  it("de los equipables que el cliente no trae (6 375 desde el parche 70532) ninguno lo trae la comunidad; el Muro de los Muertos (hotfix posterior a nuestra caché anterior) ya es del cliente con las mismas cifras", () => {
+  it("de los objetos que el cliente lista sin datos, la comunidad solo trae los que el servidor no ha retirado", () => {
     const wsIds = new Set(db.items.map((i) => i.id));
-    expect(client.unavailable.filter((u) => wsIds.has(u.id)).map((u) => u.id)).toEqual([]);
-    const wall = merged.items.find((i) => i.id === 1979)!;
-    expect(wall.provenance).toBe("client-db2");
-    expect(wall.armor).toBe(1937); // = la cifra que traía la comunidad
-    expect(wall.stats.find((x) => x.key === "block-value")?.value).toBe(41);
+    // los retirados (el servidor no los devolvió) siguen listados sin datos aunque la comunidad los conozca...
+    const back = merged.items.filter((i) => retired.has(i.id));
+    expect(back.map((i) => i.id)).toEqual([]);
+    expect(client.unavailable.filter((u) => wsIds.has(u.id) && retired.has(u.id)).length).toBeGreaterThan(300);
+    // ...y los demás nunca los trae la comunidad
+    expect(client.unavailable.filter((u) => wsIds.has(u.id) && !retired.has(u.id)).map((u) => u.id)).toEqual([]);
   });
 
   describe("contraste exacto con sus objetos (8 589 comunes)", () => {
@@ -113,7 +119,7 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     const so = (w: (typeof db.items)[number]) => Object.values(w.scalingOptions ?? {})[0];
 
     it("calidad y nivel de objeto coinciden en TODOS", () => {
-      expect(common.length).toBeGreaterThan(8500);
+      expect(common.length).toBeGreaterThan(8100); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
       expect(common.filter((w) => byId.get(w.id)!.quality !== w.quality)).toHaveLength(0);
       expect(common.filter((w) => so(w)?.ilvl !== undefined && so(w)!.ilvl !== byId.get(w.id)!.itemLevel)).toHaveLength(0);
     });
@@ -128,7 +134,7 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
         n++;
         if (Math.abs(mine.weapon.min - o.weaponDamageMin) > 1 || Math.abs(mine.weapon.max - (o.weaponDamageMax ?? 0)) > 1 || Math.abs((w.weaponSpeed ?? mine.weapon.speed) - mine.weapon.speed) > 0.001) bad.push(w.id);
       }
-      expect(n).toBeGreaterThan(1300);
+      expect(n).toBeGreaterThan(1250); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
       expect(bad).toEqual([]);
       // Ya no hay estimaciones: la tabla de daño a distancia es del cliente y el daño reducido de las armas de lanzador es 2/3 y 29/39
       expect(client.items.filter((i) => i.weapon?.confidence === "estimated")).toHaveLength(0);
@@ -147,7 +153,7 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
         if ((theirs["5"] ?? 0) !== dmg || (theirs["4"] ?? 0) !== heal) continue;
         n++;
       }
-      expect(n).toBeGreaterThan(150);
+      expect(n).toBeGreaterThan(140); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     });
 
     it("«único-equipado» y valor de bloqueo: sin diferencias", () => {

@@ -35,9 +35,9 @@
     "nodesNamed": 58
   },
   "items": {
-    "total": 12656,
-    "filled": 4031,
-    "own": 12,
+    "total": 11271,
+    "filled": 3035,
+    "own": 9,
     "stillMissing": [
       6802,
       6803,
@@ -48,6 +48,7 @@
       10711,
       10823,
       10824,
+      18610,
       264501,
       270081,
       270098,
@@ -63,10 +64,12 @@
       280505,
       287072
     ],
-    "qualityMismatch": []
+    "qualityMismatch": [
+      "18610 «Machete cortante» (calidad 2) ↔ «Keen Machete» (calidad 1)"
+    ]
   },
   "effectSpells": {
-    "total": 1828,
-    "filled": 1750
+    "total": 1732,
+    "filled": 1654
   }
 }

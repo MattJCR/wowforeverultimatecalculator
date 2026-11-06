@@ -41,10 +41,10 @@ describe.skipIf(!has)("procs del equipo", () => {
 
   it("los defensivos, los sin daño y los de tasa desconocida no se estiman", () => {
     const all = items.items.flatMap((i) => i.effects.filter((e) => e.proc).map((e) => e.proc!));
-    expect(all.length).toBeGreaterThan(250);
+    expect(all.length).toBeGreaterThan(200); // retirados (6/11): el servidor no devuelve unos 1 400 objetos
     expect(all.filter((p) => p.onTaken && isEstimable(p))).toEqual([]);
     expect(all.filter((p) => isEstimable(p)).every((p) => hasKnownRate(p) && p.damage !== null)).toBe(true);
-    expect(all.filter(isEstimable).length).toBeGreaterThanOrEqual(40); // 40 hoy: el resto de procs no trae tasa conocida
+    expect(all.filter(isEstimable).length).toBeGreaterThanOrEqual(30); // 31 hoy (40 antes de retirar los objetos que el servidor no devuelve, 6/11): el resto de procs no trae tasa conocida
   });
 
   it("aparecen como filas de «Armas» con su nota", () => {

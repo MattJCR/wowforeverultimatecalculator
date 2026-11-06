@@ -43,7 +43,7 @@ describe.skipIf(!existsSync(join(RAW, "ItemSetSpell.csv")))("conjuntos y efectos
         expect(piece.itemSetId).toBe(set.id);
       }
     }
-    expect(withData).toBeGreaterThan(1500);
+    expect(withData).toBeGreaterThan(900); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     expect(total - withData).toBeGreaterThan(1400); // piezas sin ItemSparse (p. ej. todas las Vestiduras Necrópilas): el conjunto sale, la pieza no
   });
 
@@ -51,7 +51,7 @@ describe.skipIf(!existsSync(join(RAW, "ItemSetSpell.csv")))("conjuntos y efectos
     const fx = byId.get(19019)!.effects;
     expect(fx.some((e) => e.name === "Furiatrueno" && e.trigger === 2 && e.text.includes("300 p. de daño de Naturaleza"))).toBe(true);
     const all = [...byId.values()].flatMap((i) => i.effects);
-    expect(all.length).toBeGreaterThan(1000);
+    expect(all.length).toBeGreaterThan(900); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
     expect(all.filter((e) => !e.textComplete).length).toBeLessThan(40);
     expect(data.sets.flatMap((s) => s.bonuses).filter((b) => !b.textComplete).length).toBeLessThanOrEqual(3);
   });

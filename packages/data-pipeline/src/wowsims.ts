@@ -277,9 +277,10 @@ export function extraItems(db: WowsimsDb, knownIds: Set<number>, names: Record<s
 }
 
 /** Completa `items.json` con lo de la comunidad: objetos que el volcado no trae y las listas de sufijos aleatorios de cada objeto. */
-export function applyWowsims(base: Items, db: WowsimsDb, names: Record<string, string> = {}): { items: Items; extra: number; skipped: number } {
+export function applyWowsims(base: Items, db: WowsimsDb, names: Record<string, string> = {}, retired: Set<number> = new Set()): { items: Items; extra: number; skipped: number } {
   // Los que el cliente lista pero sin datos (`unavailable`) y la comunidad si trae pasan a ser objetos `community`
   const known = new Set(base.items.map((i) => i.id));
+  for (const id of retired) known.add(id); // retirados (el servidor no los devuelve): la comunidad tampoco los trae de vuelta
   const { items: extra, skipped } = extraItems(db, known, names);
   const recovered = new Set(extra.map((i) => i.id));
   const unavailable = base.unavailable.filter((u) => !recovered.has(u.id));

@@ -10,6 +10,7 @@ import { buildEquipRules } from "./equip-rules.js";
 import { buildItems } from "./items.js";
 import { buildItemSources } from "./item-sources.js";
 import { observedSources, type ObservedSources } from "./observed-sources.js";
+import { loadRetired } from "./server-retired.js";
 import { buildBuffs, type BuffRules } from "./buffs.js";
 import { buildWeaponEnhancements } from "./weapon-enhancements.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "./wowsims.js";
@@ -114,7 +115,10 @@ function build(): void {
     if (existsSync(join(wsDir, "db.json")) && existsSync(join(wsDir, "CombatRatings.txt"))) {
       const db = JSON.parse(readFileSync(join(wsDir, "db.json"), "utf8")) as WowsimsDb;
       wsDb = db;
-      const merged = applyWowsims(built, db, loadOverrides(locale).names);
+      // Objetos que el cliente lista y el servidor no devolvió al pedírselos con el addon de la caché (data/observed/cache-report.json): retirados
+      const retired = loadRetired(repoRoot, buildId, new Set(raw.table("ItemSparse").map((r) => int(r.ID))));
+      if (retired.size) console.log(`Retirados: ${retired.size} objetos que el servidor no devuelve (tampoco entran desde la copia de la comunidad)`);
+      const merged = applyWowsims(built, db, loadOverrides(locale).names, retired);
       built = merged.items;
       const ws: string[] = [];
       const ratings = CombatRatings.parse(buildCombatRatings(readFileSync(join(wsDir, "CombatRatings.txt"), "utf8"), buildId));
