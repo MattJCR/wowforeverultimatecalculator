@@ -2,7 +2,7 @@
 -- Objetos: los 9469 de la lista base + 220 que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
 -- Ademas anota, sin pedir nada, lo que el juego ya te ensena: botin por criatura/objeto (cuerpos y veces que salio cada objeto), vendedores con sus costes y recompensas de mision (WFUC_ItemCacheDB.seen).
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
--- Boton en el minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
+-- Boton que orbita por fuera del borde del minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
 -- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
 -- Tambien: /wfucitems start | stop | status | report | seen | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
@@ -880,7 +880,8 @@ end
 local function placeButton()
   local a = math.rad(db.angle or 200)
   button:ClearAllPoints()
-  button:SetPoint('CENTER', Minimap, 'CENTER', math.cos(a) * 80, math.sin(a) * 80)
+  local r = Minimap:GetWidth() / 2 + 22 -- por FUERA del borde del minimapa (el radio sigue al tamano que tenga)
+  button:SetPoint('CENTER', Minimap, 'CENTER', math.cos(a) * r, math.sin(a) * r)
 end
 
 local function showTooltip(self)
