@@ -85,7 +85,7 @@ const lua = `-- WFUC_ItemCache v5: pide al servidor, poco a poco, los ${list.len
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
 -- Boton que orbita por fuera del borde del minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
 -- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
--- Tambien: /wfucitems start | stop | status | report | seen | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
+-- Silencioso: no escribe en el chat salvo que lo pidas (comando o clic derecho). Tambien: /wfucitems start | stop | status | report | seen | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
 local ids = {
 ${fmt(list)}
@@ -103,7 +103,9 @@ local atan2 = math.atan2 or math.atan
 
 local db, ticker, button, refresh, seenSummary -- db se rellena en ADDON_LOADED: las variables guardadas NO existen cuando se ejecuta este fichero
 
-local function say(msg) DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end
+-- Silencioso por defecto: el estado se ve en el color y el tooltip del boton. Solo habla cuando TU lo pides (comando /wfucitems o clic derecho).
+local speak = false
+local function say(msg) if speak then DEFAULT_CHAT_FRAME:AddMessage('|cff66ccffWFUC|r ' .. msg) end end
 
 local function cached(id)
   if C_Item and C_Item.IsItemDataCachedByID then return C_Item.IsItemDataCachedByID(id) end
@@ -301,6 +303,7 @@ local function createButton()
   label:SetTextColor(0, 0, 0)
   button:SetHighlightTexture('Interface/Minimap/UI-Minimap-ZoomButton-Highlight')
   button:SetScript('OnClick', function(_, b)
+    speak = (b == 'RightButton') -- el clic derecho pide el estado: ese si se escribe en el chat
     if b == 'RightButton' then
       if IsShiftKeyDown() then reset() else status() end
     elseif ticker then
@@ -308,6 +311,7 @@ local function createButton()
     else
       start()
     end
+    speak = false
   end)
   local tipTicker
   button:SetScript('OnEnter', function(self)
@@ -480,6 +484,7 @@ end)
 SLASH_WFUCITEMS1 = '/wfucitems'
 SlashCmdList.WFUCITEMS = function(arg)
   if not db then return end
+  speak = true -- los comandos escritos si contestan
   arg = (arg or ''):lower()
   if arg == 'start' then start()
   elseif arg == 'stop' then stop('parado en ' .. db.idx .. ' / ' .. #ids)
@@ -487,6 +492,7 @@ SlashCmdList.WFUCITEMS = function(arg)
   elseif arg == 'report' then report()
   elseif arg == 'seen' then say('observado: ' .. seenSummary() .. (db.errors and (' (errores internos: ' .. db.errors .. ', ultimo: ' .. db.lastError .. ')') or ''))
   else status() end
+  speak = false
 end
 `;
 fs.mkdirSync(OUT, { recursive: true });
