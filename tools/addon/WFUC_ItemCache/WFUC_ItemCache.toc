@@ -1,8 +1,8 @@
 ## Interface: 16001
 ## Title: WFUC ItemCache
-## Notes: Pide por lotes pequenos los objetos que faltan en la cache local (boton del minimapa o /wfucitems start)
+## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start)
 ## Author: local
-## Version: 3
+## Version: 4
 ## SavedVariables: WFUC_ItemCacheDB
 
 WFUC_ItemCache.lua

@@ -1,7 +1,9 @@
--- WFUC_ItemCache v3: pide al servidor, poco a poco, los 9469 objetos conocidos que faltan en la cache local.
+-- WFUC_ItemCache v4: pide al servidor, poco a poco, los 9653 objetos y 403 hechizos de objeto que conocemos y faltan en la cache local.
+-- Objetos: los 9469 de la lista base + 184 que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
+-- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
 -- Boton en el minimapa: clic izquierdo = empezar / parar; clic derecho = estado; Mayus + clic derecho = empezar de cero; arrastrar = mover.
 -- Colores: ROJO sin empezar · NARANJA trabajando · AMARILLO pendiente (parado a medias o en pausa por combate) · VERDE terminado.
--- Tambien: /wfucitems start | stop | status | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
+-- Tambien: /wfucitems start | stop | status | report | reset. No se inicia solo. Guarda por donde va en WFUC_ItemCacheDB
 -- (variables guardadas del propio juego, se escriben al salir/recargar) y retoma desde ahi.
 local ids = {
   17, 192, 647, 753, 754, 776, 809, 811, 812, 833, 862, 867, 868, 869,
@@ -680,10 +682,57 @@ local ids = {
   288873, 288874, 288875, 288876, 288877, 288878, 288879, 288880, 288881, 288882, 288883, 288884, 288885, 288886,
   288887, 288888, 288889, 288890, 288891, 288892, 288893, 288894, 288901, 288902, 288903, 288904, 288905, 288906,
   288907, 288908, 288909, 288910, 288911, 288913, 288914, 288915, 288916, 288917, 288918, 288919, 288920, 288921,
-  288922, 288923, 288924, 288925, 289302,
+  288922, 288923, 288924, 288925, 289302, 1664, 2824, 7188, 9196, 9479, 10750, 10782, 12413, 12423,
+  13243, 14557, 16803, 17075, 17078, 18204, 18720, 18806, 18824, 19134, 19135, 19878, 22302, 22305,
+  22406, 167648, 171470, 217294, 217299, 221030, 223326, 227683, 227684, 227952, 227955, 227957, 227961, 228070,
+  228254, 228272, 228285, 228591, 229380, 230248, 230802, 232299, 236020, 236149, 236150, 236490, 236491, 236500,
+  236501, 246494, 246495, 246618, 246619, 247829, 249533, 252024, 252025, 254431, 256067, 262891, 262892, 262897,
+  262898, 271718, 271895, 271896, 271897, 271899, 271900, 271901, 271942, 271943, 272050, 272460, 272466, 272482,
+  272493, 272546, 272547, 272605, 272607, 272610, 272612, 272613, 272615, 272616, 272618, 272620, 272621, 272622,
+  272623, 272624, 272628, 272629, 272631, 272632, 272633, 272635, 272638, 272639, 272644, 272645, 272646, 272651,
+  272652, 272653, 272654, 272655, 272658, 272659, 272660, 272661, 272662, 272664, 272665, 272666, 272667, 272668,
+  272672, 272673, 272674, 272675, 272676, 272679, 272688, 272689, 272690, 272691, 272692, 272714, 272798, 272799,
+  272832, 272836, 272861, 272862, 272863, 272864, 272865, 273354, 273446, 273603, 274216, 274242, 274440, 274441,
+  274442, 274443, 275712, 276208, 276214, 276215, 278512, 278548, 278549, 278550, 278551, 278552, 278553, 278972,
+  278976, 279495, 280202, 280204, 281655, 286650, 287065, 287072, 287073, 287074, 287075, 287076, 287077, 287417,
+  287961, 288506, 288619, 288998, 289291, 289293, 289438,
 }
-local BATCH, INTERVAL = 5, 2 -- 5 peticiones cada 2 segundos (~64 min en total)
-local LIST_ID = '1.60.1.70790:9469:691146926' -- identifica ESTA lista de ids
+local BASE_N = 9469 -- los primeros BASE_N ids son la lista base; el resto son referenciados por el cliente
+local spells = {
+  94, 109, 114, 315, 344, 365, 469, 492, 501, 544, 545, 549, 554, 593,
+  621, 631, 632, 636, 645, 648, 658, 682, 708, 765, 805, 876, 892, 894,
+  899, 901, 909, 923, 951, 955, 966, 972, 975, 987, 998, 1001, 1034, 1036,
+  1038, 1052, 1069, 1073, 1184, 1457, 1707, 1941, 1945, 2011, 2352, 2616, 2617, 2783,
+  2820, 2821, 2822, 2864, 2866, 2937, 3077, 3078, 3213, 3549, 3727, 3731, 3738, 3740,
+  3746, 5303, 5304, 5311, 5312, 5388, 5391, 5592, 5601, 5602, 5645, 5701, 5704, 5718,
+  5719, 6058, 6069, 6134, 6135, 6148, 6207, 6208, 6209, 6230, 6260, 6261, 6344, 6361,
+  6509, 6614, 6623, 6739, 7325, 7522, 7524, 7526, 7530, 7531, 7537, 7539, 7541, 7542,
+  7543, 7545, 7547, 7551, 7553, 7555, 7557, 7559, 7561, 7563, 7565, 7567, 7575, 7577,
+  7601, 7614, 7615, 7616, 7618, 12970, 16280, 17556, 18287, 19929, 19930, 19931, 19933, 19934,
+  19935, 19936, 21567, 22093, 22096, 22097, 25294, 27105, 27123, 30047, 46917, 370451, 399983, 400021,
+  400030, 400035, 400036, 401727, 402327, 402612, 402756, 402835, 402840, 402845, 402863, 402917, 403194, 403347,
+  403348, 403350, 403351, 403357, 403518, 403632, 403693, 403728, 403739, 403859, 403861, 403862, 403864, 403866,
+  403869, 403870, 403874, 405667, 408093, 408297, 409069, 409070, 409213, 409315, 409541, 409789, 409798, 409816,
+  409822, 409825, 409829, 409916, 409917, 409919, 409929, 409949, 409956, 409967, 409971, 409972, 409978, 409981,
+  410102, 410142, 411141, 412100, 412364, 412429, 412442, 412506, 412516, 412525, 412722, 412793, 413286, 413349,
+  413382, 413405, 413447, 414801, 415029, 415077, 415078, 415135, 415138, 415159, 415230, 415257, 415290, 415391,
+  415453, 415454, 415456, 415466, 415470, 415480, 415482, 415483, 415484, 415591, 415593, 415606, 415609, 415610,
+  415704, 415705, 415707, 415708, 415710, 415711, 415715, 415716, 415724, 415726, 415727, 415728, 415730, 415733,
+  415741, 415742, 415746, 415747, 415748, 415752, 415754, 415757, 415758, 415763, 415764, 415765, 415767, 415815,
+  415819, 415932, 416212, 426158, 426176, 426945, 437806, 437808, 438169, 445261, 447284, 447285, 447286, 447289,
+  447291, 447292, 447294, 447295, 462215, 468997, 469141, 469385, 1216618, 1216710, 1219817, 1220381, 1220874, 1225761,
+  1225894, 1226557, 1227397, 1230241, 1231184, 1245550, 1247330, 1252979, 1252980, 1252981, 1252982, 1252983, 1252984, 1252985,
+  1252986, 1252987, 1252988, 1252989, 1252990, 1252991, 1252992, 1252993, 1252995, 1252996, 1252997, 1252998, 1252999, 1253000,
+  1253001, 1253002, 1253003, 1253004, 1253005, 1253006, 1253378, 1253379, 1253380, 1253381, 1253382, 1253383, 1253384, 1253385,
+  1253386, 1253387, 1253388, 1253389, 1254964, 1255072, 1255094, 1255122, 1262942, 1262961, 1262967, 1262973, 1262987, 1263033,
+  1263036, 1263045, 1263046, 1263055, 1263066, 1263072, 1263895, 1265542, 1280646, 1281914, 1281926, 1281931, 1284543, 1291343,
+  1292482, 1294198, 1299865, 1301752, 1302223, 1306734, 1306800, 1306816, 1307177, 1307224, 1307225, 1307228, 1307231, 1307236,
+  1307241, 1307250, 1307256, 1307262, 1307263, 1307389, 1307394, 1311505, 1320565, 1320597, 1324635,
+}
+local BATCH, INTERVAL = 5, 2 -- 5 peticiones cada 2 segundos (~68 min en total)
+local LIST_ID = '1.60.1.70790:9469:691146926' -- identifica la lista base de objetos (el avance sobrevive si solo cambian los ids del final)
+local EXTRA_ID = '184:42729372' -- identifica los objetos anadidos al final
+local SPELL_ID = '403:191541091' -- identifica la lista de hechizos
 local COLORS = { red = { 0.9, 0.15, 0.15 }, orange = { 1, 0.55, 0 }, yellow = { 1, 0.9, 0.1 }, green = { 0.15, 0.8, 0.2 } }
 local atan2 = math.atan2 or math.atan
 
@@ -696,12 +745,28 @@ local function cached(id)
   return GetItemInfo(id) ~= nil
 end
 
+local function spellCached(id)
+  if C_Spell then
+    if C_Spell.IsSpellDataCached then return C_Spell.IsSpellDataCached(id) end
+    if C_Spell.GetSpellName then return C_Spell.GetSpellName(id) ~= nil end
+  end
+  return GetSpellInfo ~= nil and GetSpellInfo(id) ~= nil
+end
+
+local function requestSpell(id)
+  if C_Spell and C_Spell.RequestLoadSpellData then C_Spell.RequestLoadSpellData(id)
+  elseif GetSpellInfo then GetSpellInfo(id) end
+end
+
+local function finished() return db.idx > #ids and db.sidx > #spells end
+
 -- Cuenta cuantos de los ya pedidos conoce el cliente (solo de los ya pedidos, para no lanzar peticiones nuevas).
 local knownCache, knownAt = 0, -100
 local function known()
   if GetTime() - knownAt < 5 then return knownCache end
   local n = 0
   for i = 1, math.min(db.idx - 1, #ids) do if cached(ids[i]) then n = n + 1 end end
+  for i = 1, math.min(db.sidx - 1, #spells) do if spellCached(spells[i]) then n = n + 1 end end
   knownCache, knownAt = n, GetTime()
   return n
 end
@@ -712,9 +777,39 @@ local function state()
     if UnitAffectingCombat('player') then return 'yellow', 'En pausa (combate)' end
     return 'orange', 'Trabajando'
   end
-  if db.idx > #ids then return 'green', 'Terminado' end
-  if db.idx == 1 then return 'red', 'Sin empezar' end
+  if finished() then return 'green', 'Terminado' end
+  if db.idx == 1 and db.sidx == 1 then return 'red', 'Sin empezar' end
   return 'yellow', 'Pendiente: parado a mitad'
+end
+
+-- «1-5,9,12-14» a partir de una lista ordenada de ids.
+local function ranges(list)
+  local out, a, b = {}, nil, nil
+  local function push() if a then out[#out + 1] = (a == b) and tostring(a) or (a .. '-' .. b) end end
+  for _, id in ipairs(list) do
+    if a and id == b + 1 then b = id else push() a, b = id, id end
+  end
+  push()
+  return table.concat(out, ',')
+end
+
+-- Informe para tools: ids pedidos que el cliente sigue sin tener. Solo mira lo ya pedido y no lanza peticiones.
+local function report()
+  local noItems, noSpells, gotItems, gotSpells = {}, {}, 0, 0
+  for i = 1, math.min(db.idx - 1, #ids) do
+    if cached(ids[i]) then gotItems = gotItems + 1 else noItems[#noItems + 1] = ids[i] end
+  end
+  for i = 1, math.min(db.sidx - 1, #spells) do
+    if spellCached(spells[i]) then gotSpells = gotSpells + 1 else noSpells[#noSpells + 1] = spells[i] end
+  end
+  table.sort(noItems) table.sort(noSpells)
+  local version, build = GetBuildInfo()
+  db.report = {
+    at = date('%Y-%m-%d %H:%M'), version = version, build = build, list = LIST_ID,
+    items = math.min(db.idx - 1, #ids), itemsKnown = gotItems, itemsMissing = ranges(noItems),
+    spells = math.min(db.sidx - 1, #spells), spellsKnown = gotSpells, spellsMissing = ranges(noSpells),
+  }
+  say('informe: objetos ' .. gotItems .. ' conocidos, ' .. #noItems .. ' sin llegar; hechizos ' .. gotSpells .. ' conocidos, ' .. #noSpells .. ' sin llegar. Guardado en WFUC_ItemCacheDB.report (se escribe al salir/recargar).')
 end
 
 refresh = function()
@@ -734,36 +829,46 @@ local function tick()
   local sent = 0
   while sent < BATCH do
     local id = ids[db.idx]
-    if not id then
-      stop('terminado: recorridos los ' .. #ids .. '. Espera 1 min y despues /logout (salir del todo, sin cierre forzado).')
-      return
-    end
-    db.idx = db.idx + 1
-    if not cached(id) then -- los que el cliente ya conoce no se piden
-      if C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) else GetItemInfo(id) end
-      sent = sent + 1
+    if id then
+      db.idx = db.idx + 1
+      if not cached(id) then -- los que el cliente ya conoce no se piden
+        if C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) else GetItemInfo(id) end
+        sent = sent + 1
+      end
+    else
+      local sp = spells[db.sidx]
+      if not sp then
+        stop('terminado: ' .. #ids .. ' objetos y ' .. #spells .. ' hechizos recorridos. En 60 s se guarda el informe; despues /logout (salir del todo, sin cierre forzado).')
+        C_Timer.After(60, function() if db and finished() then report() end end)
+        return
+      end
+      db.sidx = db.sidx + 1
+      if not spellCached(sp) then
+        requestSpell(sp)
+        sent = sent + 1
+      end
     end
   end
-  if db.idx % 500 < 12 then say((db.idx - 1) .. ' / ' .. #ids) end
+  if db.idx % 500 < 12 then say((db.idx - 1) .. ' / ' .. #ids .. ' objetos') end
 end
 
 local function start()
   if not db then return end
   if ticker then say('ya esta en marcha') return end
-  if db.idx > #ids then say('ya esta terminado (Mayus + clic derecho o /wfucitems reset para empezar de cero)') refresh() return end
+  if finished() then say('ya esta terminado (Mayus + clic derecho o /wfucitems reset para empezar de cero)') refresh() return end
   ticker = C_Timer.NewTicker(INTERVAL, tick)
-  say('retomando desde ' .. db.idx .. ' / ' .. #ids .. ' (se detiene en combate o al cambiar de zona)')
+  say('retomando: objetos ' .. math.min(db.idx, #ids + 1) - 1 .. ' / ' .. #ids .. ', hechizos ' .. math.min(db.sidx, #spells + 1) - 1 .. ' / ' .. #spells .. ' (se detiene en combate o al cambiar de zona)')
   refresh()
 end
 
 local function status()
   local _, label = state()
-  say(label .. ': recorridos ' .. (db.idx - 1) .. ' / ' .. #ids .. '; ya conocidos por el cliente de los pedidos: ' .. known())
+  say(label .. ': objetos ' .. math.min(db.idx - 1, #ids) .. ' / ' .. #ids .. ', hechizos ' .. math.min(db.sidx - 1, #spells) .. ' / ' .. #spells .. '; ya conocidos por el cliente de los pedidos: ' .. known())
 end
 
 local function reset()
   stop()
-  db.idx = 1
+  db.idx, db.sidx, db.report = 1, 1, nil
   say('avance a cero')
   refresh()
 end
@@ -780,12 +885,14 @@ local function showTooltip(self)
   GameTooltip:ClearLines()
   GameTooltip:AddLine('WFUC ItemCache')
   GameTooltip:AddLine(label, 1, 1, 1)
-  local done = math.min(db.idx - 1, #ids)
-  GameTooltip:AddLine(done .. ' / ' .. #ids .. ' (' .. math.floor(done * 100 / #ids) .. '%)', 0.8, 0.8, 0.8)
-  if db.idx > #ids then
+  local done = math.min(db.idx - 1, #ids) + math.min(db.sidx - 1, #spells)
+  local all = #ids + #spells
+  GameTooltip:AddLine(done .. ' / ' .. all .. ' (' .. math.floor(done * 100 / all) .. '%): ' .. #ids .. ' objetos + ' .. #spells .. ' hechizos', 0.8, 0.8, 0.8)
+  if finished() then
     GameTooltip:AddLine('Recibidos por el cliente: ' .. known() .. '. El resto, probablemente ya no existe en el servidor.', 0.8, 0.8, 0.8, true)
+    if db.report then GameTooltip:AddLine('Informe guardado ' .. db.report.at, 0.8, 0.8, 0.8) else GameTooltip:AddLine('El informe se guarda 60 s despues de terminar', 0.8, 0.8, 0.8) end
   else
-    GameTooltip:AddLine('Faltan unos ' .. math.ceil((#ids - done) / BATCH * INTERVAL / 60) .. ' min', 0.8, 0.8, 0.8)
+    GameTooltip:AddLine('Faltan unos ' .. math.ceil((all - done) / BATCH * INTERVAL / 60) .. ' min', 0.8, 0.8, 0.8)
   end
   GameTooltip:AddLine(' ')
   GameTooltip:AddLine('Clic izquierdo: empezar / parar', 0.6, 0.8, 1)
@@ -865,8 +972,14 @@ ev:SetScript('OnEvent', function(_, event, arg1)
     if arg1 ~= 'WFUC_ItemCache' then return end
     WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
     db = WFUC_ItemCacheDB
-    if db.list ~= LIST_ID then db.list, db.idx = LIST_ID, 1 end -- lista nueva (otro parche): empezar de cero; la misma: retomar
+    if db.list ~= LIST_ID then db.list, db.idx, db.sidx, db.report = LIST_ID, 1, 1, nil end -- lista base nueva (otro parche): empezar de cero; la misma: retomar
     db.idx = db.idx or 1
+    db.sidx = db.sidx or 1
+    if db.extra ~= EXTRA_ID then -- cambiaron los objetos del final: si ya habia pasado de la lista base, volver a su final
+      db.extra = EXTRA_ID
+      if db.idx > BASE_N + 1 then db.idx = BASE_N + 1 end
+    end
+    if db.spellList ~= SPELL_ID then db.spellList, db.sidx = SPELL_ID, 1 end
     createButton()
     ev:UnregisterEvent('ADDON_LOADED')
   elseif event == 'PLAYER_LEAVING_WORLD' then
@@ -884,5 +997,6 @@ SlashCmdList.WFUCITEMS = function(arg)
   if arg == 'start' then start()
   elseif arg == 'stop' then stop('parado en ' .. db.idx .. ' / ' .. #ids)
   elseif arg == 'reset' then reset()
+  elseif arg == 'report' then report()
   else status() end
 end
