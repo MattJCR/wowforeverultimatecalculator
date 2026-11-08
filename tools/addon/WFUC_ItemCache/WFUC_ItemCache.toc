@@ -2,7 +2,7 @@
 ## Title: WFUC ItemCache
 ## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves
 ## Author: local
-## Version: 5
+## Version: 6
 ## SavedVariables: WFUC_ItemCacheDB
 
 WFUC_ItemCache.lua

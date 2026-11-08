@@ -1,4 +1,4 @@
-# WFUC_ItemCache (v5)
+# WFUC_ItemCache (v6)
 
 Addon manual para completar la caché local de hotfixes (`DBCache.bin`) cuando faltan objetos —y los hechizos que esos objetos usan— que conocemos pero que el servidor aún no ha enviado a este cliente.
 
@@ -16,3 +16,5 @@ Addon manual para completar la caché local de hotfixes (`DBCache.bin`) cuando f
 - El avance se guarda en `WFUC_ItemCacheDB` (variables guardadas del juego, se escriben al salir o recargar). Ojo: esas variables se cargan **después** de ejecutar el código del addon, por eso la base se inicializa en `ADDON_LOADED`.
 - Al terminar: esperar 1 minuto, `/logout` normal (sin cierre forzado), repetir la lectura de hotfixes (docs/EXTRACTION.md) y `npm run patch-check -- --hotfix <build>`.
 - **Pruebas:** sintaxis comprobada con un analizador Lua independiente y ejecución completa (inicio, tandas, reanudar desde el avance de la v3, informe) con un intérprete Lua y las APIs de WoW simuladas. **Sin probar en el juego:** las llamadas a `C_Spell`, `GetLootSourceInfo`, `GetMerchantItemCostInfo` y `GetQuestID` (si alguna no existe en este cliente el fallo se cuenta en `db.errors` y el resto sigue); en `C_Spell`, si falta, el código usa `GetSpellInfo` o no hace nada. Si da un error al cargar, corregir la plantilla del generador, no el `.lua` generado.
+
+**v6:** un marco por evento y guarda `issecretvalue`: el cliente 70862 entrega algunos argumentos de evento como valores «secretos» y comparar el nombre del evento daba 14 errores («attempt to compare a secret string value»). La lista de ids es la misma que la de la v5 (no reinicia el avance ni borra el informe).

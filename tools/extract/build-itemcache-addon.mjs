@@ -79,7 +79,7 @@ const extraId = `${itemExtras.length}:${sum(itemExtras)}`;
 const spellId = `${spells.length}:${sum(spells)}`;
 
 // Las rutas de textura van con «/» (WoW las acepta) para no depender de escapes de Lua.
-const lua = `-- WFUC_ItemCache v5: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
+const lua = `-- WFUC_ItemCache v6: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
 -- Objetos: los ${base.length} de la lista base + ${itemExtras.length} que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
 -- Ademas anota, sin pedir nada, lo que el juego ya te ensena: botin por criatura/objeto (cuerpos y veces que salio cada objeto), vendedores con sus costes y recompensas de mision (WFUC_ItemCacheDB.seen).
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
@@ -445,41 +445,43 @@ seenSummary = function()
   return countKeys(db.seen.loot) .. ' fuentes de botin (' .. items .. ' pares objeto-fuente), ' .. countKeys(db.seen.vendors) .. ' vendedores, ' .. countKeys(db.seen.quests) .. ' misiones'
 end
 
-local ev = CreateFrame('Frame')
-ev:RegisterEvent('LOOT_OPENED')
-ev:RegisterEvent('MERCHANT_SHOW')
-ev:RegisterEvent('QUEST_COMPLETE')
-ev:RegisterEvent('ADDON_LOADED')
-ev:RegisterEvent('PLAYER_LEAVING_WORLD')
-ev:RegisterEvent('PLAYER_REGEN_DISABLED')
-ev:RegisterEvent('PLAYER_REGEN_ENABLED')
-ev:SetScript('OnEvent', function(_, event, arg1)
-  if event == 'ADDON_LOADED' then
-    if arg1 ~= 'WFUC_ItemCache' then return end
-    WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
-    db = WFUC_ItemCacheDB
-    if db.list ~= LIST_ID then db.list, db.idx, db.sidx, db.report = LIST_ID, 1, 1, nil end -- lista base nueva (otro parche): empezar de cero; la misma: retomar
-    db.idx = db.idx or 1
-    db.sidx = db.sidx or 1
-    if db.extra ~= EXTRA_ID then -- cambiaron los objetos del final: si ya habia pasado de la lista base, volver a su final
-      db.extra = EXTRA_ID
-      if db.idx > BASE_N + 1 then db.idx = BASE_N + 1 end
-    end
-    if db.spellList ~= SPELL_ID then db.spellList, db.sidx = SPELL_ID, 1 end
-    db.seen = db.seen or {}
-    db.seen.loot, db.seen.vendors, db.seen.quests = db.seen.loot or {}, db.seen.vendors or {}, db.seen.quests or {} -- lo observado nunca se borra con reset
-    createButton()
-    ev:UnregisterEvent('ADDON_LOADED')
-  elseif event == 'PLAYER_LEAVING_WORLD' then
-    if ticker then ticker:Cancel() ticker = nil end
-    refresh()
-  elseif event == 'LOOT_OPENED' then onLoot()
-  elseif event == 'MERCHANT_SHOW' then onMerchant()
-  elseif event == 'QUEST_COMPLETE' then onQuest()
-  else
-    refresh() -- entrar o salir de combate cambia naranja <-> amarillo
+-- Un marco por evento y sin comparar el nombre del evento: el cliente actual entrega algunos argumentos (y a veces el propio evento) como
+-- valores «secretos» y compararlos da error («attempt to compare a secret string value»); asi solo se mira arg1 de ADDON_LOADED, y con guarda.
+local function onEvent(name, fn)
+  local f = CreateFrame('Frame')
+  f:RegisterEvent(name)
+  f:SetScript('OnEvent', fn)
+  return f
+end
+
+local loader
+loader = onEvent('ADDON_LOADED', function(_, _, arg1)
+  if issecretvalue and issecretvalue(arg1) then return end
+  if arg1 ~= 'WFUC_ItemCache' then return end
+  WFUC_ItemCacheDB = WFUC_ItemCacheDB or {}
+  db = WFUC_ItemCacheDB
+  if db.list ~= LIST_ID then db.list, db.idx, db.sidx, db.report = LIST_ID, 1, 1, nil end -- lista base nueva (otro parche): empezar de cero; la misma: retomar
+  db.idx = db.idx or 1
+  db.sidx = db.sidx or 1
+  if db.extra ~= EXTRA_ID then -- cambiaron los objetos del final: si ya habia pasado de la lista base, volver a su final
+    db.extra = EXTRA_ID
+    if db.idx > BASE_N + 1 then db.idx = BASE_N + 1 end
   end
+  if db.spellList ~= SPELL_ID then db.spellList, db.sidx = SPELL_ID, 1 end
+  db.seen = db.seen or {}
+  db.seen.loot, db.seen.vendors, db.seen.quests = db.seen.loot or {}, db.seen.vendors or {}, db.seen.quests or {} -- lo observado nunca se borra con reset
+  createButton()
+  loader:UnregisterEvent('ADDON_LOADED')
 end)
+onEvent('PLAYER_LEAVING_WORLD', function()
+  if ticker then ticker:Cancel() ticker = nil end
+  refresh()
+end)
+onEvent('LOOT_OPENED', function() onLoot() end)
+onEvent('MERCHANT_SHOW', function() onMerchant() end)
+onEvent('QUEST_COMPLETE', function() onQuest() end)
+onEvent('PLAYER_REGEN_DISABLED', function() refresh() end) -- entrar o salir de combate cambia naranja <-> amarillo
+onEvent('PLAYER_REGEN_ENABLED', function() refresh() end)
 
 SLASH_WFUCITEMS1 = '/wfucitems'
 SlashCmdList.WFUCITEMS = function(arg)
@@ -497,5 +499,5 @@ end
 `;
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.lua"), lua);
-fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves\n## Author: local\n## Version: 5\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
+fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves\n## Author: local\n## Version: 6\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
 console.log(`${base.length} objetos de la lista base + ${itemExtras.length} referenciados + ${spells.length} hechizos (≈ ${minutes} min) → ${path.relative(ROOT, OUT)}`);
