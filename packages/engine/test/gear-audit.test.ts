@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { classifyGearAuras, collectStatEffects, enchantEffectText, enchantStatLines, gearSpellModifiers, indexClass, isZoneOnlyEffect, type GearEffectSource } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70790");
+const D = join(root, "data", "forever", "1.60.1.70862");
 const has = existsSync(join(D, "items.json")) && existsSync(join(D, "enchants.json")) && existsSync(join(D, "classes", "mage.json"));
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 
@@ -120,12 +120,14 @@ describe.skipIf(!has)("auditoría del equipo: bonos de conjunto, efectos de obje
     109: "habilidad con componente curativo adicional (conjuntos de sacerdote)",
     112: "daño plano a un hechizo concreto (ídem)",
     117: "resistencia a un control sin texto del cliente (mecánica no confirmada)",
+    32: "velocidad de montura (Guantes de escolta, 70862)",
     129: "velocidad de movimiento solo en zonas concretas",
     130: "velocidad de montura",
     144: "reducción del daño por caídas",
     154: "nivel de sigilo",
     155: "respiración acuática",
     226: "velocidad de ataque alterna (Péndulo de Fatalidad)",
+    245: "reducción de la duración de los venenos (Corazón de Noxxion, 70862)",
     255: "reducción de daño condicionada (tejehierro)",
     275: "permiso de lanzar habilidades en forma (Druida)",
     305: "suelo de velocidad de movimiento",

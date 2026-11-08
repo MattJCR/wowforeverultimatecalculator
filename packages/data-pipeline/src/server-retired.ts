@@ -22,7 +22,7 @@ export interface CacheReport {
 
 /**
  * Objetos RETIRADOS: el addon de la caché los pidió al servidor (los conocíamos por el cliente, por volcados anteriores o por la copia de
- * la comunidad) y el servidor no los devolvió. Solo vale si el informe es del mismo build que los datos (`buildId` = «1.60.1.70790»).
+ * la comunidad) y el servidor no los devolvió. Solo vale si el informe es del mismo build que los datos (`buildId` = «1.60.1.70862»).
  * Se descartan los que la caché final SÍ trae (`have`): el servidor responde con retraso y el informe se hace 60 s después de pedir, así que
  * unos cuantos aparecen como «sin llegar» y luego llegan. Ninguno de los retirados debe volver por otra vía (ni arrastrado de una caché antigua ni de la copia de la comunidad).
  */

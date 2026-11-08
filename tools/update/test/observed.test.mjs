@@ -6,7 +6,7 @@ import { parseLuaTable } from "../../extract/lib/lua-table.mjs";
 // Formato real de SavedVariables: claves entre corchetes, comentarios «-- [n]», comas finales, cadenas con escapes.
 const SAMPLE = `
 WFUC_ItemCacheDB = {
-	["list"] = "1.60.1.70790:9469:691146926",
+	["list"] = "1.60.1.70862:9469:691146926",
 	["idx"] = 9654,
 	["angle"] = 201.5,
 	["seen"] = {
@@ -39,7 +39,7 @@ WFUC_ItemCacheDB = {
 describe("parseLuaTable", () => {
   const db = parseLuaTable(SAMPLE);
   it("lee cadenas, números, booleanos y tablas anidadas", () => {
-    assert.equal(db.list, "1.60.1.70790:9469:691146926");
+    assert.equal(db.list, "1.60.1.70862:9469:691146926");
     assert.equal(db.idx, 9654);
     assert.equal(db.angle, 201.5);
     assert.equal(db.flag, true);

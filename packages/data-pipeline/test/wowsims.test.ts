@@ -10,7 +10,7 @@ import { loadRetired } from "../src/server-retired.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "../src/wowsims.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70790";
+const BUILD = "1.60.1.70862";
 const WS = join(root, "data", "external", "wowsims");
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 const ready = existsSync(join(WS, "db.json")) && existsSync(join(WS, "CombatRatings.txt")) && existsSync(join(RAW, "RandPropPoints.csv"));
@@ -102,7 +102,8 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     // los retirados (el servidor no los devolvió) siguen listados sin datos aunque la comunidad los conozca...
     const back = merged.items.filter((i) => retired.has(i.id));
     expect(back.map((i) => i.id)).toEqual([]);
-    expect(client.unavailable.filter((u) => wsIds.has(u.id) && retired.has(u.id)).length).toBeGreaterThan(300);
+    // 70862: el servidor devolvió 783 de los objetos que el 6/11 no daba (la cuenta de retirados comunes baja de más de 300 a 88); siguen sin llegar 8 618
+    expect(client.unavailable.filter((u) => wsIds.has(u.id) && retired.has(u.id)).length).toBeGreaterThan(50);
     // ...y los demás nunca los trae la comunidad
     expect(client.unavailable.filter((u) => wsIds.has(u.id) && !retired.has(u.id)).map((u) => u.id)).toEqual([]);
   });

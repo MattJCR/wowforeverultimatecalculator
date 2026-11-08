@@ -15,7 +15,7 @@ import { activatableTalents, allModifiersFor, applyModifiers, canCrit, collectSt
  * Cada lista de abajo es EXACTA: si cambia (para bien o para mal) la prueba falla y obliga a revisarla.
  */
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70790");
+const D = join(root, "data", "forever", "1.60.1.70862");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 const classes = readdirSync(join(D, "classes")).map((f) => {
   const token = f.replace(".json", "");
@@ -322,7 +322,8 @@ describe("cargas, radio y duración de hechizos citados (operaciones 4, 6 y 1)",
       const r = rankAtLevel(findAbility(k.abilities, ability)!, 60)!;
       return { base: r.radiusYd, mod: applyModifiers(r, 60, spellModifiersOf(k.cls, only(k.cls, talent))).radiusYd };
     };
-    expect(radius("mage", "Alcance ártico", "Nova de Escarcha")).toEqual({ base: 10, mod: 12 });
+    // 70862 (7/11): el cliente deja a 0 el índice de radio de Nova de Escarcha (antes 10 yd) y las notas oficiales no lo mencionan: sin radio no hay nada que ampliar; sin confirmar
+    expect(radius("mage", "Alcance ártico", "Nova de Escarcha")).toEqual({ base: null, mod: null });
     expect(radius("mage", "Alcance ártico", "Cono de frío")).toEqual({ base: 10, mod: 12 });
     // Distraer mejorado (+5 m al radio de Distraer) sale del árbol del Pícaro en el 70755
   });
@@ -346,6 +347,7 @@ describe("todas las operaciones de talentos que el motor calcula se ven en la fi
     "hunter: Aspectos letales → Aspecto de la bestia (op 18)": "idem",
     "hunter: Ojo de águila → Disparo de quimera (op 5)": "el talento llega por el hechizo de la picadura, no por el alcance de Disparo de quimera",
     "mage: Lanzallamas → Bomba viva (op 5)": "idem: llega por el hechizo disparado, el alcance de la habilidad no cambia",
+    "mage: Alcance ártico → Nova de Escarcha (op 6)": "70862: el cliente ya no trae radio para Nova de Escarcha (índice de radio a 0), así que el +20 % no tiene cifra que mover; sin confirmar con otra fuente",
     "warlock: Alcance macabro → Aullido de terror (op 5)": "el alcance del hechizo es nulo (es de área: radio 10 m, que este talento no modifica)",
     "warlock: Alcance destructivo → Piroinferno (op 5)": SELF,
     "priest: Alcance de las Sombras → Guardia de las Sombras (op 5)": SELF,
