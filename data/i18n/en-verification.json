@@ -35,10 +35,14 @@
     "nodesNamed": 58
   },
   "items": {
-    "total": 12834,
+    "total": 12837,
     "filled": 4268,
     "own": 12,
-    "stillMissing": [],
+    "stillMissing": [
+      862,
+      281599,
+      287028
+    ],
     "qualityMismatch": []
   },
   "effectSpells": {

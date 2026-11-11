@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "build": "1.60.1.70888",
   "locale": "esES",
-  "generatedAt": "2026-11-11T07:26:06.397Z",
+  "generatedAt": "2026-11-11T11:24:45.292Z",
   "hotfixesApplied": true,
   "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
   "classes": [
@@ -317,9 +317,9 @@
   },
   "items": {
     "file": "items.json",
-    "sha256": "bb31a667bbc76623804cd6febec3687e1daf12ad509be927eeeb5d0ad4ea342a",
-    "itemCount": 12834,
-    "unavailableCount": 5213
+    "sha256": "660dcc82449becaa483974f3619a9d37853d04ec57dfb55d5a762797923f787d",
+    "itemCount": 12837,
+    "unavailableCount": 5210
   },
   "equipRules": {
     "file": "equip-rules.json",
@@ -442,7 +442,7 @@
     },
     {
       "table": "ItemSparse",
-      "sha256": "f39dddd05a27a79a64bc241383a37cbdfc16b5ef8ef4aeb42ce3448989787e17"
+      "sha256": "3ed35a047eef3ee6ed678e4257312d4c977bb51de2d57c36148e925993f422e6"
     },
     {
       "table": "ItemXItemEffect",
