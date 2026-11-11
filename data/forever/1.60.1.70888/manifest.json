@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "build": "1.60.1.70888",
   "locale": "esES",
-  "generatedAt": "2026-11-11T11:24:45.292Z",
+  "generatedAt": "2026-11-11T19:33:35.053Z",
   "hotfixesApplied": true,
   "source": "Cliente WoW Forever beta (solo lectura) via wow.tools.local; ver docs/EXTRACTION.md",
   "classes": [
@@ -302,8 +302,8 @@
   },
   "itemSources": {
     "file": "sources.json",
-    "sha256": "b57778b4a9520af085183a190408a667a29ab9398854399fea69005faff85490",
-    "count": 1421
+    "sha256": "90bdafd6add3eaffa36dfc67b009ae6b255ef67a864bfc03c55e2632ab9a8eac",
+    "count": 1510
   },
   "buffs": {
     "file": "buffs.json",
@@ -317,9 +317,9 @@
   },
   "items": {
     "file": "items.json",
-    "sha256": "660dcc82449becaa483974f3619a9d37853d04ec57dfb55d5a762797923f787d",
-    "itemCount": 12837,
-    "unavailableCount": 5210
+    "sha256": "f88e5eccf4f813687dba2444e1f3c245639ce2d886b9b6bd6fdebd3df338bab2",
+    "itemCount": 12864,
+    "unavailableCount": 5186
   },
   "equipRules": {
     "file": "equip-rules.json",
@@ -338,12 +338,12 @@
   },
   "icons": {
     "file": "icons.json",
-    "count": 2026,
-    "sha256": "f755c2fc0d029a44e2cfcea282c40358e6e9bb266d17d461f9536a57a3fcbadb"
+    "count": 2027,
+    "sha256": "60d35d2c4fc399a6729b842c06f7ec0a0b141037eef7804d13ba11678139ecbf"
   },
   "english": {
     "file": "i18n/en.json",
-    "sha256": "d174ce769011bb6f9f6288b6af5cfe7c3188499651e019fb6bc3118229b768a6"
+    "sha256": "aed684c9ff321369a9da8c503e0ed05e1a03ea0f618f30a93ac8e24aa5c90f94"
   },
   "unassigned": {
     "file": "unassigned.json",
@@ -390,7 +390,7 @@
     },
     {
       "table": "Item",
-      "sha256": "a01766c0c7e762fb68614c585c3f4b3252e0b68d726728b9d1e9b28d03a0ecae"
+      "sha256": "491b8890c495a4f5b146f3cbb43804dfd9c617f2e0d959963ccd9dae2921144c"
     },
     {
       "table": "ItemArmorQuality",
@@ -442,7 +442,7 @@
     },
     {
       "table": "ItemSparse",
-      "sha256": "3ed35a047eef3ee6ed678e4257312d4c977bb51de2d57c36148e925993f422e6"
+      "sha256": "1bf7f8864637e69bd9ff4f8cc274647e255d426745aec1fbe53eb240c10a560f"
     },
     {
       "table": "ItemXItemEffect",
