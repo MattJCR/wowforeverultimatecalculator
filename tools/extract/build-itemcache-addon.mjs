@@ -10,8 +10,11 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const BUILD = process.argv[2] ?? "1.60.1.70888";
 const OUT = path.join(ROOT, "tools", "addon", "WFUC_ItemCache");
-const BATCH = 5; // peticiones por tanda
-const INTERVAL = 2; // segundos entre tandas
+// Ritmo: 10 peticiones por segundo (antes 5 cada 2 s). El cliente agrupa las peticiones de una misma tanda en una sola consulta al servidor, y el propio juego
+// pide de golpe decenas de objetos al abrir la casa de subastas o el diario de mazmorras; por eso 10/s es un ritmo normal. Para no dar por retirado lo que solo fue
+// una saturación, al terminar el addon vuelve a pedir una muestra de lo que no llegó al ritmo lento antiguo y anota cuántos llegan (report.verify).
+const BATCH = 10; // peticiones por tanda
+const INTERVAL = 1; // segundos entre tandas
 
 const ids = (p) => (fs.existsSync(p) ? new Set(fs.readFileSync(p, "utf8").split("\n").map((l) => /^(\d+),/.exec(l)).filter(Boolean).map((m) => Number(m[1]))) : new Set());
 const raw = (b, t) => path.join(ROOT, "data", "raw", b, `${t}.csv`);
@@ -191,6 +194,40 @@ local function stop(why)
   refresh()
 end
 
+-- Comprobacion del ritmo: vuelve a pedir, al ritmo lento de antes, una muestra repartida de los objetos que NO llegaron. Si el servidor los devuelve ahora, la
+-- tanda rapida se paso de ritmo y esos «sin llegar» no eran retirados (report.verify.recovered > 0). Despues rehace el informe (los recuperados dejan de constar como ausentes).
+local VERIFY_SAMPLE, VERIFY_BATCH, VERIFY_INTERVAL = 300, 5, 2
+local function verify()
+  local missing = {}
+  for i = 1, math.min(db.idx - 1, #ids) do if not cached(ids[i]) then missing[#missing + 1] = ids[i] end end
+  if #missing == 0 then return end
+  local sample, step, pos = {}, math.max(1, #missing / VERIFY_SAMPLE), 1
+  while math.floor(pos) <= #missing and #sample < VERIFY_SAMPLE do
+    sample[#sample + 1] = missing[math.floor(pos)]
+    pos = pos + step
+  end
+  local n, vt = 0, nil
+  vt = C_Timer.NewTicker(VERIFY_INTERVAL, function()
+    if UnitAffectingCombat('player') then return end
+    for _ = 1, VERIFY_BATCH do
+      n = n + 1
+      local id = sample[n]
+      if not id then
+        vt:Cancel()
+        C_Timer.After(30, function()
+          local got = 0
+          for _, sid in ipairs(sample) do if cached(sid) then got = got + 1 end end
+          report()
+          db.report.verify = { sample = #sample, recovered = got, slow = VERIFY_BATCH .. '/' .. VERIFY_INTERVAL .. ' s', fast = BATCH .. '/' .. INTERVAL .. ' s' }
+          say('comprobacion del ritmo: de ' .. #sample .. ' ids que no llegaron, ' .. got .. ' llegan al pedirlos despacio. Informe guardado (se escribe al salir/recargar).')
+        end)
+        return
+      end
+      if C_Item and C_Item.RequestLoadItemDataByID then C_Item.RequestLoadItemDataByID(id) else GetItemInfo(id) end
+    end
+  end)
+end
+
 local function tick()
   if UnitAffectingCombat('player') then return end
   local sent = 0
@@ -205,8 +242,8 @@ local function tick()
     else
       local sp = spells[db.sidx]
       if not sp then
-        stop('terminado: ' .. #ids .. ' objetos y ' .. #spells .. ' hechizos recorridos. En 60 s se guarda el informe; despues /logout (salir del todo, sin cierre forzado).')
-        C_Timer.After(60, function() if db and finished() then report() end end)
+        stop('terminado: ' .. #ids .. ' objetos y ' .. #spells .. ' hechizos recorridos. En 60 s se guarda el informe y se comprueba el ritmo con una muestra (otros 3 min); despues /logout (salir del todo, sin cierre forzado).')
+        C_Timer.After(60, function() if db and finished() then report() verify() end end)
         return
       end
       db.sidx = db.sidx + 1
