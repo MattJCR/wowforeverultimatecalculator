@@ -15,7 +15,7 @@ import { activatableTalents, allModifiersFor, applyModifiers, canCrit, collectSt
  * Cada lista de abajo es EXACTA: si cambia (para bien o para mal) la prueba falla y obliga a revisarla.
  */
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70862");
+const D = join(root, "data", "forever", "1.60.1.70888");
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 const classes = readdirSync(join(D, "classes")).map((f) => {
   const token = f.replace(".json", "");
@@ -40,6 +40,7 @@ describe("la mejora de un talento se ve en la descripción de la habilidad (las 
     "rogue: Golpe de gracia → Marca de muerte": "el límite de daño del hechizo lleva `$<coup>` (condicional «si conoces Golpe de gracia») dentro de una fórmula sin resolver: el texto no enseña la cifra",
     "rogue: Golpe de gracia → Marca de la muerte": "idem (Marca de la muerte es la versión de Forever de Marca de muerte)",
     "druid: Génesis → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
+    "druid: Génesis → Lanzarse": "70888: la máscara propia de Lanzarse (131072) cruza la de Génesis, pero el daño periódico lo hace su sangrado (9007, 9824, 9826), al que el hotfix da la máscara [0,0,0,128] (SpellClassOptions), que la de Génesis no cruza: el +2 % no llega a la cifra",
     "druid: Regalo de la Naturaleza → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
     "druid: Regalo de la Naturaleza → Tranquilidad": "la máscara de sanación directa (operación 0) la cruza pero Tranquilidad es periódica y la de sanación periódica (22) no la incluye, como en Classic",
     "hunter: Picaduras mejoradas → Disparo de quimera": "la cifra es un % del daño de la Picadura: el talento sube la Picadura, no esta cifra",

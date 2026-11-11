@@ -10,7 +10,7 @@ import { loadRetired } from "../src/server-retired.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "../src/wowsims.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70862";
+const BUILD = "1.60.1.70888";
 const WS = join(root, "data", "external", "wowsims");
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 const ready = existsSync(join(WS, "db.json")) && existsSync(join(WS, "CombatRatings.txt")) && existsSync(join(RAW, "RandPropPoints.csv"));
@@ -87,10 +87,11 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     expect(extra.length).toBeGreaterThan(0);
     const clientIds = new Set(client.items.map((i) => i.id));
     expect(extra.every((i) => !clientIds.has(i.id) && i.textOrigin === "untranslated")).toBe(true);
-    // Retirados (6/11): el servidor no devolvió el Muro de los Muertos (1979) al pedirlo con el addon de la caché; no entra ni del cliente ni de la comunidad
-    expect(extra.map((i) => i.id)).not.toContain(1979);
-    expect(retired.has(1979)).toBe(true);
-    expect(merged.items.some((i) => i.id === 1979)).toBe(false);
+    // Retirados (6/11): el servidor no devolvió la Espada de Teebu (1728) al pedirlo con el addon de la caché; no entra ni del cliente ni de la comunidad.
+    // (El Muro de los Muertos, 1979, era el ejemplo hasta el 70862; en el 70888 el servidor ya lo devuelve y entra del cliente.)
+    expect(extra.map((i) => i.id)).not.toContain(1728);
+    expect(retired.has(1728)).toBe(true);
+    expect(merged.items.some((i) => i.id === 1728)).toBe(false);
     // y ninguno de los retirados vuelve por la copia de la comunidad
     expect(extra.filter((i) => retired.has(i.id))).toEqual([]);
     // lo del cliente no se toca
@@ -103,7 +104,7 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     const back = merged.items.filter((i) => retired.has(i.id));
     expect(back.map((i) => i.id)).toEqual([]);
     // 70862: el servidor devolvió 783 de los objetos que el 6/11 no daba (la cuenta de retirados comunes baja de más de 300 a 88); siguen sin llegar 8 618
-    expect(client.unavailable.filter((u) => wsIds.has(u.id) && retired.has(u.id)).length).toBeGreaterThan(50);
+    expect(client.unavailable.filter((u) => wsIds.has(u.id) && retired.has(u.id)).length).toBeGreaterThan(10); // 70888: el servidor devolvió 1 716 objetos más; quedan 22 retirados comunes con la copia (88 en el 70862)
     // ...y los demás nunca los trae la comunidad
     expect(client.unavailable.filter((u) => wsIds.has(u.id) && !retired.has(u.id)).map((u) => u.id)).toEqual([]);
   });
@@ -136,7 +137,8 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
         if (Math.abs(mine.weapon.min - o.weaponDamageMin) > 1 || Math.abs(mine.weapon.max - (o.weaponDamageMax ?? 0)) > 1 || Math.abs((w.weaponSpeed ?? mine.weapon.speed) - mine.weapon.speed) > 0.001) bad.push(w.id);
       }
       expect(n).toBeGreaterThan(1250); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
-      expect(bad).toEqual([]);
+      // 70888: Ira de la Tormenta (280604) pasa de 3,2 s y 91-137 a 3,6 s y 102-154 (mismo DPS); la copia de la comunidad conserva el arma anterior y manda el cliente
+      expect(bad).toEqual([280604]);
       // Ya no hay estimaciones: la tabla de daño a distancia es del cliente y el daño reducido de las armas de lanzador es 2/3 y 29/39
       expect(client.items.filter((i) => i.weapon?.confidence === "estimated")).toHaveLength(0);
     });

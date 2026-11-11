@@ -17,7 +17,7 @@ import { buildLegacy } from "../src/legacy.js";
 import { buildUnassigned } from "../src/unassigned.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70862";
+const BUILD = "1.60.1.70888";
 const load = (dir: string) => buildClassTalents(openRawTables(join(root, "data", "raw", dir)), BUILD, "esES");
 
 /** Con los hotfixes de la cache del juego aplicados: la verdad "en vivo". */
@@ -28,7 +28,7 @@ const legacyData = buildLegacy(openRawTables(join(root, "data", "raw", `${BUILD}
 const byToken = (r: typeof live, t: string) => r.classes.find((c) => c.classToken === t)!;
 const TOKENS = ["DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"];
 
-describe("arboles de talentos de Forever (cliente 1.60.1.70862, con hotfixes)", () => {
+describe("arboles de talentos de Forever (cliente 1.60.1.70888, con hotfixes)", () => {
   it("cumple el esquema en todas las clases", () => {
     for (const c of live.classes) expect(() => ClassTalents.parse(c)).not.toThrow();
   });
@@ -868,17 +868,15 @@ describe("idioma: el cliente trae algunos textos de Forever en ingles", () => {
     expect(looksEnglish("")).toBe(false);
   });
 
-  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (11 desde el 70790)", () => {
+  it("ningun talento de clase se muestra en ingles: los que el cliente trae sin traducir llevan traduccion propia marcada (1 desde el 70888)", () => {
     const own = all.filter(({ t }) => t.textOrigin === "translated-by-us").map(({ cls, t }) => `${cls}: ${t.name}`);
     // Hasta el 17/10 eran 13; los hotfixes del 19/10 traducen 12 y dejan Tromba de misiles en ingles (y le anaden Explosion de Escarcha)
     // El 70707 devuelve al inglés 18 textos de talentos (rediseño del Paladín y Druida, enfoques de lanzamiento…): traducción propia marcada en data/i18n/esES-overrides.json
     // El 70755 traduce 13 de esos (Enfoques de lanzamiento, Filo de depredador, Canalización mejorada…: la traducción propia sobra) y devuelve al inglés 4 talentos nuevos del Pícaro
+    // El 70888 traduce los 10 restantes (Druida: Disciplina depredadora, Floración; Paladín: Juicio presto, Juramento de escudo, Ahuyentar el mal;
+    // Sacerdote: Vinculación sagrada —antes «Vínculo sagrado»—; Pícaro: Salpicadura de sangre, Veneno, Destello de acero, Cuchillo de bota): la traducción propia sobra
     expect([...own].sort()).toEqual(
       [
-        "Druida: Disciplina depredadora", "Druida: Floración",
-        "Paladín: Juicio presto", "Paladín: Juramento de escudo", "Paladín: Ahuyentar el mal",
-        "Sacerdote: Vínculo sagrado",
-        "Pícaro: Salpicadura de sangre", "Pícaro: Veneno", "Pícaro: Destello de acero", "Pícaro: Cuchillo de bota",
         // El estático del 70790 devuelve al inglés Alcance ártico (en el 70755 venía en español): se conserva el español que traía el cliente
         "Mago: Alcance ártico",
       ].sort(),
@@ -1195,7 +1193,8 @@ describe("habilidades de Chaman, Cazador, Brujo y Druida frente a la referencia 
   const classes = [
     // Cadena de relámpagos y Mareas vivas (rediseño del lanzamiento, notas del 3/11): el coste del cliente es mayor/menor que el de la referencia, que va por detrás
     { id: 7, token: "shaman", name: "Chaman", abilities: 64, ranks: 200, compared: 179, behind: ["Shaman|Chain Lightning|Rank 1 coste", "Shaman|Chain Lightning|Rank 2 coste", "Shaman|Chain Lightning|Rank 3 coste", "Shaman|Chain Lightning|Rank 4 coste", "Shaman|Riptide|Rank 1 coste", "Shaman|Riptide|Rank 2 coste", "Shaman|Riptide|Rank 3 coste"] },
-    { id: 3, token: "hunter", name: "Cazador", abilities: 68, ranks: 171, compared: 145, behind: [] as string[] },
+    // Disparo Arcano e Invocar halcón (70888): el cliente pasa su coste de maná fijo a un 11 % del maná base (SpellPower.PowerCostPct); la referencia va por detrás
+    { id: 3, token: "hunter", name: "Cazador", abilities: 68, ranks: 171, compared: 145, behind: ["Hunter|Summon Hawk|Rank 1 coste", "Hunter|Summon Hawk|Rank 2 coste", "Hunter|Summon Hawk|Rank 3 coste", "Hunter|Summon Hawk|Rank 4 coste", "Hunter|Arcane Shot|Rank 1 coste", "Hunter|Arcane Shot|Rank 2 coste", "Hunter|Arcane Shot|Rank 3 coste", "Hunter|Arcane Shot|Rank 4 coste", "Hunter|Arcane Shot|Rank 5 coste", "Hunter|Arcane Shot|Rank 6 coste", "Hunter|Arcane Shot|Rank 7 coste", "Hunter|Arcane Shot|Rank 8 coste"] },
     { id: 9, token: "warlock", name: "Brujo", abilities: 66, ranks: 198, compared: 171 },
     { id: 11, token: "druid", name: "Druida", abilities: 69, ranks: 223, compared: 208 }, // 221 y 207 hasta el 70685: Lacerar y Mordedura feroz ganan rangos de entrenador
   ];
@@ -1469,7 +1468,7 @@ describe("estadisticas por clase y nivel del cliente (PlayerExpectedStat y ChrCl
 });
 
 
-describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70862)", () => {
+describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70888)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
   const COND = /\uE000([sa]\d+(?:\|[sa]\d+)*)\uE001([^\uE001]*)\uE001([^\uE002]*)\uE002/;

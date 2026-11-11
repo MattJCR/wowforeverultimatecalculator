@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { classifyGearAuras, collectStatEffects, enchantEffectText, enchantStatLines, gearSpellModifiers, indexClass, isZoneOnlyEffect, type GearEffectSource } from "../src/index.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const D = join(root, "data", "forever", "1.60.1.70862");
+const D = join(root, "data", "forever", "1.60.1.70888");
 const has = existsSync(join(D, "items.json")) && existsSync(join(D, "enchants.json")) && existsSync(join(D, "classes", "mage.json"));
 const json = (f: string) => JSON.parse(readFileSync(join(D, f), "utf8"));
 
@@ -120,6 +120,7 @@ describe.skipIf(!has)("auditoría del equipo: bonos de conjunto, efectos de obje
     109: "habilidad con componente curativo adicional (conjuntos de sacerdote)",
     112: "daño plano a un hechizo concreto (ídem)",
     117: "resistencia a un control sin texto del cliente (mecánica no confirmada)",
+    120: "no se puede rastrear (Junco maderahelecho, objeto que el servidor devuelve desde el 70888)",
     32: "velocidad de montura (Guantes de escolta, 70862)",
     129: "velocidad de movimiento solo en zonas concretas",
     130: "velocidad de montura",

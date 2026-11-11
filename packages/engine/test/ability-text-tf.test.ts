@@ -15,7 +15,7 @@ const nums = (s: string) => [...s.replace(/\n/g, " ").replace(/(\d),(\d{3})/g, "
 const close = (a: number, b: number) => Math.abs(a - b) <= Math.max(1, Math.abs(b) * 0.005);
 
 function load(c: string) {
-  const ab = Abilities.parse(JSON.parse(readFileSync(join(root, `data/forever/1.60.1.70862/abilities/${c}.json`), "utf8")));
+  const ab = Abilities.parse(JSON.parse(readFileSync(join(root, `data/forever/1.60.1.70888/abilities/${c}.json`), "utf8")));
   const tf = JSON.parse(readFileSync(join(root, `data/external/talentsforever/${c}.json`), "utf8")).spell_desc as Record<string, { id?: number; d?: string }>;
   const by = new Map<number, { name: string; rank: (typeof ab.abilities)[number]["ranks"][number] }>();
   for (const a of ab.abilities) for (const r of a.ranks) by.set(r.spellId, { name: a.name, rank: r });
@@ -33,11 +33,12 @@ describe("textos de las habilidades frente a la referencia (nivel 60, sin talent
   // 70707: Paladín 161 de 167 (salen 5 habilidades del libro y entra Juramento de luz, que la referencia no lista) y 25 distintas (24 antes: Escudo Sagrado, Vigilia de la Luz y Furia justa
   // cambian por hotfix y la referencia declara el build 70630); Druida 208 (Lacerar y Mordedura feroz ganan rangos de entrenador)
   const EXPECTED: Record<string, [number, number]> = {
+    // 70888 (11/11): Brujo 165 (Arruinar se rediseña: 25,2 p. durante 6 s y 100 % de daño recibido en lugar de 36 p. y +10 %; la referencia, que declara el 70753, trae el texto anterior).
     // 5/11 (70790, primera lectura con el juego en el mundo): Guerrero 109 (Actitud defensiva r1 ya trae el 80 % de amenaza del hotfix del 4/11, igual que la referencia; el resto sigue como en el 70755).
     // 70755 (la referencia declara el 70753): cambios del lanzamiento que aún no trae (notas de Blizzard del 3/11 y hotfix del Cazador): Guerrero 108 (Embate 15 s, Lanzazo 75 %), Paladín 162 (Escudo Sagrado rango 4),
     // Pícaro 118 (Mutilar pierde un rango; venenos y Hemorragia cambian), Cazador 93 (Tiro de puntería, Tiro Arcano, Aguijón de serpiente, Aspecto del halcón, Aura de disparo certero, Disparo de francotirador),
     // Chamán 149 de 179 (Descarga de relámpagos, Choque de tierra/llamas/Escarcha, Cadena de relámpagos, Mareas vivas, Golpe de tormenta) y Druida 164 (un texto más difiere desde el 70862 por los retoques de Druida del parche (Forma de oso, Espinas, Devastar); Destripar, Fuego estelar, Triturar, Zarpa, Arañazo, Mordedura feroz, Devastar, Lanzarse)
-    warrior: [116, 109], paladin: [162, 137], rogue: [118, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 93], shaman: [179, 149], warlock: [171, 166], druid: [208, 164],
+    warrior: [116, 109], paladin: [162, 137], rogue: [118, 98], priest: [238, 235], mage: [194, 186], hunter: [145, 93], shaman: [179, 149], warlock: [171, 165], druid: [208, 164],
   };
   for (const c of CLASSES) {
     it(`${c}: ${EXPECTED[c]![1]} de ${EXPECTED[c]![0]} textos con las mismas cifras`, () => {

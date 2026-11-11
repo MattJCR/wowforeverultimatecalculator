@@ -8,7 +8,7 @@ import { SpellTables } from "../src/spell-tables.js";
 import { Items } from "../src/model.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70862";
+const BUILD = "1.60.1.70888";
 const ITEM_READINGS = join(root, "data", "external", "lootified", "ItemStats.lua");
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 const haveRaw = existsSync(join(RAW, "RandPropPoints.csv"));
@@ -38,7 +38,7 @@ describe.skipIf(!ready)("objetos frente a las lecturas del juego (solo contraste
 
   it("cubre los equipables con ItemSparse y deja aparte los que el cliente no trae", () => {
     expect(data.items.length).toBeGreaterThan(11000); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
-    expect(data.unavailable.length).toBeGreaterThan(6000);
+    expect(data.unavailable.length).toBeGreaterThan(5000); // 70888: el servidor devolvió 1 716 más (5 213 sin datos; 6 000+ hasta el 70862)
     expect(data.unavailable.every((u) => !byId.has(u.id))).toBe(true);
   });
 

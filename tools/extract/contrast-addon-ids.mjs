@@ -3,9 +3,9 @@
 // Solo contraste local: escribe data/external/loot-addons/contrast-ids.json (no se publica). Uso: node tools/extract/contrast-addon-ids.mjs
 import fs from "node:fs";
 const ids = (p) => new Set(fs.readFileSync(p, "utf8").split("\n").map((l) => /^(\d+),/.exec(l)).filter(Boolean).map((m) => +m[1]));
-const R = "data/raw/1.60.1.70862-hotfix/";
+const R = "data/raw/1.60.1.70888-hotfix/";
 const sparse = ids(R + "ItemSparse.csv"), itemTable = ids(R + "Item.csv");
-const items = JSON.parse(fs.readFileSync("data/forever/1.60.1.70862/items.json", "utf8"));
+const items = JSON.parse(fs.readFileSync("data/forever/1.60.1.70888/items.json", "utf8"));
 const ours = new Set(items.items.filter((i) => !i.placeholder).map((i) => i.id));
 const placeholder = new Set(items.items.filter((i) => i.placeholder).map((i) => i.id));
 const rep = JSON.parse(fs.readFileSync("data/observed/cache-report.json", "utf8"));
