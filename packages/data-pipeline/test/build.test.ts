@@ -17,7 +17,7 @@ import { buildLegacy } from "../src/legacy.js";
 import { buildUnassigned } from "../src/unassigned.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70888";
+const BUILD = "1.60.1.70938";
 const load = (dir: string) => buildClassTalents(openRawTables(join(root, "data", "raw", dir)), BUILD, "esES");
 
 /** Con los hotfixes de la cache del juego aplicados: la verdad "en vivo". */
@@ -28,7 +28,7 @@ const legacyData = buildLegacy(openRawTables(join(root, "data", "raw", `${BUILD}
 const byToken = (r: typeof live, t: string) => r.classes.find((c) => c.classToken === t)!;
 const TOKENS = ["DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"];
 
-describe("arboles de talentos de Forever (cliente 1.60.1.70888, con hotfixes)", () => {
+describe("arboles de talentos de Forever (cliente 1.60.1.70938, con hotfixes)", () => {
   it("cumple el esquema en todas las clases", () => {
     for (const c of live.classes) expect(() => ClassTalents.parse(c)).not.toThrow();
   });
@@ -1192,7 +1192,7 @@ describe("habilidades de Chaman, Cazador, Brujo y Druida frente a la referencia 
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const classes = [
     // Cadena de relámpagos y Mareas vivas (rediseño del lanzamiento, notas del 3/11): el coste del cliente es mayor/menor que el de la referencia, que va por detrás
-    { id: 7, token: "shaman", name: "Chaman", abilities: 64, ranks: 200, compared: 179, behind: ["Shaman|Chain Lightning|Rank 1 coste", "Shaman|Chain Lightning|Rank 2 coste", "Shaman|Chain Lightning|Rank 3 coste", "Shaman|Chain Lightning|Rank 4 coste", "Shaman|Riptide|Rank 1 coste", "Shaman|Riptide|Rank 2 coste", "Shaman|Riptide|Rank 3 coste"] },
+    { id: 7, token: "shaman", name: "Chaman", abilities: 64, ranks: 200, compared: 179, behind: ["Shaman|Chain Lightning|Rank 1 coste", "Shaman|Chain Lightning|Rank 2 coste", "Shaman|Chain Lightning|Rank 3 coste", "Shaman|Chain Lightning|Rank 4 coste", "Shaman|Stormstrike| enfriamiento", "Shaman|Riptide|Rank 1 coste", "Shaman|Riptide|Rank 2 coste", "Shaman|Riptide|Rank 3 coste"] },
     // Disparo Arcano e Invocar halcón (70888): el cliente pasa su coste de maná fijo a un 11 % del maná base (SpellPower.PowerCostPct); la referencia va por detrás
     { id: 3, token: "hunter", name: "Cazador", abilities: 68, ranks: 171, compared: 145, behind: ["Hunter|Summon Hawk|Rank 1 coste", "Hunter|Summon Hawk|Rank 2 coste", "Hunter|Summon Hawk|Rank 3 coste", "Hunter|Summon Hawk|Rank 4 coste", "Hunter|Arcane Shot|Rank 1 coste", "Hunter|Arcane Shot|Rank 2 coste", "Hunter|Arcane Shot|Rank 3 coste", "Hunter|Arcane Shot|Rank 4 coste", "Hunter|Arcane Shot|Rank 5 coste", "Hunter|Arcane Shot|Rank 6 coste", "Hunter|Arcane Shot|Rank 7 coste", "Hunter|Arcane Shot|Rank 8 coste"] },
     { id: 9, token: "warlock", name: "Brujo", abilities: 66, ranks: 198, compared: 171 },
@@ -1235,7 +1235,7 @@ describe("textos de los talentos de Chaman, Cazador, Brujo y Druida frente a la 
   const nums = (t: string | undefined) => [...(t ?? "").replace(/(\d),(\d{3})/g, "$1$2").replace(/(\d),(\d)/g, "$1.$2").matchAll(/\d+(?:\.\d+)?/g)].map((m) => Number(m[0])).sort((a, b) => a - b).join(",");
   // Diferencias esperadas: cifras que escalan con el nivel (valor base frente al del nivel 60 de la referencia) o formulas del texto sin resolver
   const CASES = [
-    { token: "SHAMAN", file: "shaman", total: 145, diff: [] /* 70755: sin Ráfaga de lava (eliminada del árbol) y con Mareas vivas igual que la referencia */ as string[], notApprox: [] as string[] },
+    { token: "SHAMAN", file: "shaman", total: 145, diff: ["Maña mental r1", "Maña mental r2", "Maña mental r3", "Golpe de tormenta r1", "Arma vorágine r1", "Arma vorágine r2", "Arma vorágine r3", "Arma vorágine r4", "Arma vorágine r5"] /* 70938: ajuste de Mejora del 10/11 (Golpe de tormenta 100 % y 8 s, Maña mental 33/66/100 %, Arma vorágine 20 % por aplicación y 6-10 veces por minuto), en el cliente y en las notas de Blizzard; la referencia (70753) va por detrás */ as string[], notApprox: ["Maña mental r1", "Maña mental r2", "Maña mental r3", "Golpe de tormenta r1", "Arma vorágine r1", "Arma vorágine r2", "Arma vorágine r3", "Arma vorágine r4", "Arma vorágine r5"] },
     // Aura de disparo certero r1: el 70658 bajó el poder de ataque a distancia de 30 a 15 (y Aspecto del halcón, Pies de plomo); la referencia ya lo trae desde su export del 29/10
     { token: "HUNTER", file: "hunter", total: 148, diff: ["Disparo de francotirador r1", "Contraataque r1"], notApprox: ["Disparo de francotirador r1", "Contraataque r1"] },
     // Disparo de francotirador r1: el hotfix del 3/11 dobla el daño (160 → 320 en el rango 1); la referencia (70753) aún trae la cifra anterior
@@ -1468,7 +1468,7 @@ describe("estadisticas por clase y nivel del cliente (PlayerExpectedStat y ChrCl
 });
 
 
-describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70888)", () => {
+describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70938)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
   const COND = /\uE000([sa]\d+(?:\|[sa]\d+)*)\uE001([^\uE001]*)\uE001([^\uE002]*)\uE002/;

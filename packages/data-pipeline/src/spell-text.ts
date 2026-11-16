@@ -351,6 +351,10 @@ function expandReferences(t: SpellTables, ctx: RenderContext, text: string, dept
   out = out.replace(/\$\{(?:(\d+(?:\.\d+)?)\+)?\$(?:AP|apm)\*(\$\d*[mMsS]\d)\/100\}/g, (_m, k: string | undefined, ref: string) =>
     en ? `${k && Number(k) > 1 ? `\${${k}} plus ` : ""}\${${ref}}% of your attack power` : `${k && Number(k) > 1 ? `\${${k}} más ` : ""}un \${${ref}}% de tu poder de ataque`,
   );
+  // Probabilidad por velocidad del arma (`${($mws*$s2/60)*100}%`, Arma vorágine desde el 70938): chance = velocidad × N / 60, es decir, de media
+  // N activaciones por minuto sea cual sea el arma (las notas de Blizzard del 10/11: «6/7/8/9/10 veces por minuto»); la cifra por golpe depende del arma.
+  out = out.replace(/un \$\{\(\$mws\*(\$\d*s\d+)\/60\)\*100\}% de probabilidad \(en función de la velocidad del arma\)/g, "una probabilidad (en función de la velocidad del arma: de media ${$1} veces por minuto)");
+  out = out.replace(/a \$\{\(\$mws\*(\$\d*s\d+)\/60\)\*100\}% chance \(based on weapon speed\)/g, "a chance (based on weapon speed: on average ${$1} times per minute)");
   out = out.replace(en ? /\$c mana/g : /\$c p\. de maná/g, () => {
     const pw = t.powerCost(ctx.spellId);
     if (pw && pw.pct > 0) return en ? `${formatNumber(pw.pct)}% of base mana` : `${formatNumber(pw.pct)} % del maná base`;

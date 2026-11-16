@@ -592,7 +592,7 @@ local spells = {
   1307241, 1307250, 1307256, 1307262, 1307263, 1307389, 1307394, 1311505, 1320565, 1320597, 1324635,
 }
 local BATCH, INTERVAL = 10, 1 -- 10 peticiones cada 1 segundos (~14 min en total)
-local LIST_ID = '1.60.1.70888:6927:399847990' -- identifica la lista base de objetos (el avance sobrevive si solo cambian los ids del final)
+local LIST_ID = '1.60.1.70938:6927:399847990' -- identifica la lista base de objetos (el avance sobrevive si solo cambian los ids del final)
 local EXTRA_ID = '778:156124771' -- identifica los objetos anadidos al final
 local SPELL_ID = '403:191541091' -- identifica la lista de hechizos
 local COLORS = { red = { 0.9, 0.15, 0.15 }, orange = { 1, 0.55, 0 }, yellow = { 1, 0.9, 0.1 }, green = { 0.15, 0.8, 0.2 } }

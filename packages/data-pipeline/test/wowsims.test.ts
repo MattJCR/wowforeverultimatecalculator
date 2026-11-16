@@ -10,7 +10,7 @@ import { loadRetired } from "../src/server-retired.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "../src/wowsims.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70888";
+const BUILD = "1.60.1.70938";
 const WS = join(root, "data", "external", "wowsims");
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 const ready = existsSync(join(WS, "db.json")) && existsSync(join(WS, "CombatRatings.txt")) && existsSync(join(RAW, "RandPropPoints.csv"));
@@ -87,11 +87,11 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     expect(extra.length).toBeGreaterThan(0);
     const clientIds = new Set(client.items.map((i) => i.id));
     expect(extra.every((i) => !clientIds.has(i.id) && i.textOrigin === "untranslated")).toBe(true);
-    // Retirados (6/11): el servidor no devolvió la Espada de Teebu (1728) al pedirlo con el addon de la caché; no entra ni del cliente ni de la comunidad.
-    // (El Muro de los Muertos, 1979, era el ejemplo hasta el 70862; en el 70888 el servidor ya lo devuelve y entra del cliente.)
+    // La Espada llameante de Teebu (1728) estuvo retirada (6/11: el servidor no la devolvía al pedirla con el addon de la caché); en el 70938 el hotfix la trae
+    // y entra del cliente, no de la comunidad ni como retirada. (El Muro de los Muertos, 1979, hizo lo mismo en el 70888.)
     expect(extra.map((i) => i.id)).not.toContain(1728);
-    expect(retired.has(1728)).toBe(true);
-    expect(merged.items.some((i) => i.id === 1728)).toBe(false);
+    expect(retired.has(1728)).toBe(false);
+    expect(merged.items.find((i) => i.id === 1728)?.provenance).toBe("client-db2");
     // y ninguno de los retirados vuelve por la copia de la comunidad
     expect(extra.filter((i) => retired.has(i.id))).toEqual([]);
     // lo del cliente no se toca

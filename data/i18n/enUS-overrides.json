@@ -14,6 +14,7 @@
     "1230172": "Increases Strength by 34.",
     "1230587": "Restores 29 mana every 5 sec.",
     "1230653": "Increases armor by 308, all attributes by 13 and all resistances by 22.",
+    "1330855": "Has a 15% chance to smite your target for 112 Holy damage when you cast a harmful spell or make an attack. Damage is tripled against Undead.",
     "9000001": "All your hard work spent mining has made you exceptionally tough, increasing your total health by 5%.",
     "9000002": "Increases the damage you deal to Beasts and Dragonkin by 5%.",
     "9000003": "Increases your resistance to all schools of magic."
@@ -26,6 +27,13 @@
   "talents": {
     "104718": [
       "Gives you a 10% chance to enter a Clearcasting state after casting any Nature, Fire or Frost damage spell. Clearcasting reduces the mana cost of your next damage spell by 100%."
+    ],
+    "104741": [
+      "When you deal damage with a melee attack, you have a chance (based on weapon speed: on average 6 times per minute) to reduce the cast time and Mana cost of your next Lightning Bolt spell by 20%. Stacks up to 5 times. Lasts 30 sec.",
+      "When you deal damage with a melee attack, you have a chance (based on weapon speed: on average 7 times per minute) to reduce the cast time and Mana cost of your next Lightning Bolt spell by 20%. Stacks up to 5 times. Lasts 30 sec.",
+      "When you deal damage with a melee attack, you have a chance (based on weapon speed: on average 8 times per minute) to reduce the cast time and Mana cost of your next Lightning Bolt spell by 20%. Stacks up to 5 times. Lasts 30 sec.",
+      "When you deal damage with a melee attack, you have a chance (based on weapon speed: on average 9 times per minute) to reduce the cast time and Mana cost of your next Lightning Bolt spell by 20%. Stacks up to 5 times. Lasts 30 sec.",
+      "When you deal damage with a melee attack, you have a chance (based on weapon speed: on average 10 times per minute) to reduce the cast time and Mana cost of your next Lightning Bolt spell by 20%. Stacks up to 5 times. Lasts 30 sec."
     ],
     "105762": [
       "Shields you, absorbing 431 damage and increasing your Frost damage by 15% for 1 min. While the shield holds, your Frost damage is increased by an additional 5% and your spellcasts will not be interrupted or delayed from taking damage."
