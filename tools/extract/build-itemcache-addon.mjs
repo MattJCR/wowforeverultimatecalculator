@@ -26,6 +26,10 @@ const known = new Set(ids(raw(`${BUILD}-hotfix`, "Item")));
 for (const d of fs.readdirSync(path.join(ROOT, "data", "raw"))) if (/-hotfix$/.test(d)) for (const x of ids(raw(d, "ItemSparse"))) known.add(x);
 const ws = path.join(ROOT, "data", "external", "wowsims", "db.json");
 if (fs.existsSync(ws)) for (const i of JSON.parse(fs.readFileSync(ws, "utf8")).items) known.add(i.id);
+// Copia más reciente de la comunidad (data/external/wowsims/db-latest.json, solo para pedir ids: el pipeline sigue con db.json): trae objetos que el servidor ya había
+// enviado a otras máquinas y que nuestra caché aún no tiene (17/11: 107 objetos que el volcado no trae).
+const wsLatest = path.join(ROOT, "data", "external", "wowsims", "db-latest.json");
+if (fs.existsSync(wsLatest)) for (const i of JSON.parse(fs.readFileSync(wsLatest, "utf8")).items) known.add(i.id);
 const base = [...known].filter((x) => !have.has(x)).sort((a, b) => a - b);
 
 // Lectura de una tabla del volcado (con comillas) para sacar ids que el cliente REFERENCIA aunque no tenga el objeto/hechizo.
@@ -82,7 +86,7 @@ const extraId = `${itemExtras.length}:${sum(itemExtras)}`;
 const spellId = `${spells.length}:${sum(spells)}`;
 
 // Las rutas de textura van con «/» (WoW las acepta) para no depender de escapes de Lua.
-const lua = `-- WFUC_ItemCache v6: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
+const lua = `-- WFUC_ItemCache v7: pide al servidor, poco a poco, los ${list.length} objetos y ${spells.length} hechizos de objeto que conocemos y faltan en la cache local.
 -- Objetos: los ${base.length} de la lista base + ${itemExtras.length} que el cliente nombra en conjuntos, apariencias, efectos, recetas y version de la otra faccion. Hechizos: efectos de objeto, de conjunto y de encantamiento.
 -- Ademas anota, sin pedir nada, lo que el juego ya te ensena: botin por criatura/objeto (cuerpos y veces que salio cada objeto), vendedores con sus costes y recompensas de mision (WFUC_ItemCacheDB.seen).
 -- Al terminar espera 60 s y guarda en WFUC_ItemCacheDB.report que ids siguen sin llegar (el servidor no los devuelve = probablemente ya no existen).
@@ -379,10 +383,19 @@ local function safe(f) -- un fallo aqui nunca debe romper el resto del addon
   end
 end
 
-local function idOf(link) return link and tonumber(link:match('item:(%d+)')) end
+-- v7: el cliente actual devuelve como valores «secretos» algunos GUID y nombres (UnitGUID, UnitName, GetLootSourceInfo); convertirlos en texto, compararlos o partirlos da error
+-- («attempt to perform string conversion on a secret string value»: 129 fallos en la lectura del 17/11). pub() los descarta.
+local function pub(v)
+  if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
+  return v
+end
+local function unitGUID(u) return pub(UnitGUID(u)) end
+local function unitName(u) return pub(UnitName(u)) end
+local function idOf(link) link = pub(link) return link and tonumber(link:match('item:(%d+)')) end
 
 -- «N123» criatura / «O123» objeto del mundo a partir de un GUID (Tipo-0-servidor-instancia-zona-ID-copia).
 local function guidKey(guid)
+  guid = pub(guid)
   if not guid then return nil end
   local kind, _, _, _, _, id = strsplit('-', guid)
   id = tonumber(id)
@@ -393,7 +406,7 @@ end
 
 local function where()
   local _, _, diff, _, _, _, _, map = GetInstanceInfo()
-  return GetRealZoneText() or '', map or 0, diff or 0
+  return pub(GetRealZoneText()) or '', map or 0, diff or 0
 end
 
 local looted = {} -- cuerpos ya contados en esta sesion (un cuerpo cuenta una vez aunque se abra varias)
@@ -404,7 +417,7 @@ local onLoot = safe(function()
     local id = idOf(GetLootSlotLink(slot))
     local src = { GetLootSourceInfo(slot) }
     for k = 1, #src, 2 do
-      local guid = src[k]
+      local guid = pub(src[k])
       if guidKey(guid) and not looted[guid] then
         bySource[guid] = bySource[guid] or {}
         if id then bySource[guid][#bySource[guid] + 1] = id end
@@ -420,7 +433,7 @@ local onLoot = safe(function()
     e.k = e.k + 1
     e.z, e.m, e.d = zone, map, diff
     if not e.n then
-      if UnitGUID('target') == guid then e.n = UnitName('target') elseif UnitGUID('mouseover') == guid then e.n = UnitName('mouseover') end
+      if unitGUID('target') == guid then e.n = unitName('target') elseif unitGUID('mouseover') == guid then e.n = unitName('mouseover') end
     end
     local once = {}
     for _, id in ipairs(list) do
@@ -430,7 +443,7 @@ local onLoot = safe(function()
 end)
 
 local onMerchant = safe(function()
-  local key = guidKey(UnitGUID('npc'))
+  local key = guidKey(unitGUID('npc'))
   if not key then return end
   local rows = {}
   for i = 1, GetMerchantNumItems() do
@@ -449,6 +462,7 @@ local onMerchant = safe(function()
         local parts = {}
         for j = 1, (GetMerchantItemCostInfo(i)) do
           local _, value, link = GetMerchantItemCostItem(i, j)
+          link = pub(link)
           local cost = idOf(link)
           if cost then parts[#parts + 1] = 'i' .. cost .. 'x' .. value
           elseif link and link:match('currency:(%d+)') then parts[#parts + 1] = 'c' .. link:match('currency:(%d+)') .. 'x' .. value end
@@ -459,7 +473,7 @@ local onMerchant = safe(function()
     end
   end
   local zone, map = where()
-  db.seen.vendors[key] = { n = UnitName('npc'), z = zone, m = map, t = time(), items = rows }
+  db.seen.vendors[key] = { n = unitName('npc'), z = zone, m = map, t = time(), items = rows }
 end)
 
 local onQuest = safe(function()
@@ -470,7 +484,7 @@ local onQuest = safe(function()
   for i = 1, GetNumQuestRewards() do local x = idOf(GetQuestItemLink('reward', i)) if x then rewards[#rewards + 1] = x end end
   local zone, map = where()
   db.seen.quests[id] = {
-    t = GetTitleText and GetTitleText(), npc = guidKey(UnitGUID('npc')), npcName = UnitName('npc'), z = zone, m = map,
+    t = GetTitleText and pub(GetTitleText()), npc = guidKey(unitGUID('npc')), npcName = unitName('npc'), z = zone, m = map,
     c = choices, r = rewards, xp = GetRewardXP and GetRewardXP(), money = GetRewardMoney and GetRewardMoney(),
   }
 end)
@@ -536,5 +550,5 @@ end
 `;
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.lua"), lua);
-fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves\n## Author: local\n## Version: 6\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
+fs.writeFileSync(path.join(OUT, "WFUC_ItemCache.toc"), "## Interface: 16001\n## Title: WFUC ItemCache\n## Notes: Pide por lotes pequenos los objetos y hechizos de objeto que faltan en la cache local (boton del minimapa o /wfucitems start) y anota botin, vendedores y misiones que ves\n## Author: local\n## Version: 7\n## SavedVariables: WFUC_ItemCacheDB\n\nWFUC_ItemCache.lua\n");
 console.log(`${base.length} objetos de la lista base + ${itemExtras.length} referenciados + ${spells.length} hechizos (≈ ${minutes} min) → ${path.relative(ROOT, OUT)}`);

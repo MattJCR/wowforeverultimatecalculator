@@ -40,7 +40,7 @@ describe("la mejora de un talento se ve en la descripción de la habilidad (las 
     "rogue: Golpe de gracia → Marca de muerte": "el límite de daño del hechizo lleva `$<coup>` (condicional «si conoces Golpe de gracia») dentro de una fórmula sin resolver: el texto no enseña la cifra",
     "rogue: Golpe de gracia → Marca de la muerte": "idem (Marca de la muerte es la versión de Forever de Marca de muerte)",
     "druid: Génesis → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
-    "druid: Génesis → Lanzarse": "70888: la máscara propia de Lanzarse (131072) cruza la de Génesis, pero el daño periódico lo hace su sangrado (9007, 9824, 9826), al que el hotfix da la máscara [0,0,0,128] (SpellClassOptions), que la de Génesis no cruza: el +2 % no llega a la cifra",
+    // 17/11 (70938): «Génesis → Lanzarse» sale de la lista: el hotfix amplía la máscara de Génesis a [0,0,0,1073741952], que ya cruza la del sangrado de Lanzarse ([0,0,0,128]); el +2 % llega a la cifra
     "druid: Regalo de la Naturaleza → Arreglo rápido": "el texto no lleva cifra (la sanación se calcula con los efectos de otro hechizo)",
     "druid: Regalo de la Naturaleza → Tranquilidad": "la máscara de sanación directa (operación 0) la cruza pero Tranquilidad es periódica y la de sanación periódica (22) no la incluye, como en Classic",
     "hunter: Picaduras mejoradas → Disparo de quimera": "la cifra es un % del daño de la Picadura: el talento sube la Picadura, no esta cifra",

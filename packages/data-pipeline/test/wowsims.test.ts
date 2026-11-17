@@ -123,7 +123,8 @@ describe.skipIf(!ready)("datos de la comunidad (MIT, `community`)", () => {
     it("calidad y nivel de objeto coinciden en TODOS", () => {
       expect(common.length).toBeGreaterThan(8100); // retirados (6/11): el servidor no devuelve unos 1 400 objetos y salen del conjunto
       expect(common.filter((w) => byId.get(w.id)!.quality !== w.quality)).toHaveLength(0);
-      expect(common.filter((w) => so(w)?.ilvl !== undefined && so(w)!.ilvl !== byId.get(w.id)!.itemLevel)).toHaveLength(0);
+      // 17/11 (70938, tercera lectura): el hotfix baja de 66 a 65 el nivel de objeto de las 4 Cartas de la Luna Negra; esta copia de la comunidad (21/10) aún trae 66
+      expect(common.filter((w) => so(w)?.ilvl !== undefined && so(w)!.ilvl !== byId.get(w.id)!.itemLevel).map((w) => w.id)).toEqual([19287, 19288, 19289, 19290]);
     });
 
     it("daño y velocidad de arma coinciden (±1) salvo cañas de pescar y objetos sin tabla: armas de lanzador y a distancia con las reglas del cliente", () => {

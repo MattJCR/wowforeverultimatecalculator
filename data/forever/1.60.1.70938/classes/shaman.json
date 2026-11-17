@@ -1315,13 +1315,7 @@
           "spellId": 16255,
           "name": "Golpes de trueno",
           "iconFileDataId": 132325,
-          "equipped": [
-            {
-              "itemClass": 2,
-              "invTypeMask": 0,
-              "subclassMask": 173555
-            }
-          ],
+          "equipped": [],
           "effectInfo": [
             {
               "index": 0,
