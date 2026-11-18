@@ -8,7 +8,7 @@ import { SpellTables } from "../src/spell-tables.js";
 import { buildWeaponEnhancements } from "../src/weapon-enhancements.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70938";
+const BUILD = "1.60.1.70959";
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 
 describe.skipIf(!["ItemSparse", "SpellItemEnchantment", "SpellEquippedItems"].every((t) => existsSync(join(RAW, `${t}.csv`))))("mejoras temporales de arma del cliente", () => {
@@ -26,7 +26,7 @@ describe.skipIf(!["ItemSparse", "SpellItemEnchantment", "SpellEquippedItems"].ev
   });
 
   it("lo que no se ofrece queda con su motivo: cebos de pesca, objetos de prueba y efectos sin implementar", () => {
-    expect(data.skipped.map((s) => s.itemId).sort((a, b) => a - b)).toEqual([2896, 2927, 6529, 6530, 6532, 6533, 6811, 7307, 202316, 259846, 268880]);
+    expect(data.skipped.map((s) => s.itemId).sort((a, b) => a - b)).toEqual([2896, 2927, 6529, 6530, 6532, 6533, 6811, 7307, 202316, 259846, 268880, 291005]); // 291005 Cebo de campista (70959): cebo de pesca, no es de combate
     const reasons = new Set(data.skipped.map((s) => s.reason));
     expect([...reasons].sort()).toEqual(["cebo de pesca: no es de combate", "objeto de prueba o retirado", "sin implementar en el cliente (texto «NYI.» y sin efecto)"]);
     // La piedra de afilar consagrada también admite cañas de pescar en su máscara, pero es de combate

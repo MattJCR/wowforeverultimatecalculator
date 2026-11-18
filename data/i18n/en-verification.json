@@ -1,12 +1,12 @@
 {
-  "build": "1.60.1.70938",
+  "build": "1.60.1.70959",
   "tablesBuild": "1.60.1.70888",
   "ranks": {
     "total": 1740,
-    "templated": 1724,
+    "templated": 1723,
     "named": 1740,
     "filledByOfficial": 189,
-    "own": 4
+    "own": 5
   },
   "nameDifferences": [
     "talento Golpes temerarios (nodo 113636): referencia «Raging Blows», oficial «Reckless Swings»",
@@ -25,8 +25,8 @@
   "talents": {
     "checked": 494,
     "official": 64,
-    "reference": 1295,
-    "own": 13
+    "reference": 1294,
+    "own": 14
   },
   "unassigned": {
     "entries": 104,
@@ -35,8 +35,8 @@
     "nodesNamed": 58
   },
   "items": {
-    "total": 13123,
-    "filled": 4382,
+    "total": 13141,
+    "filled": 4394,
     "own": 12,
     "stillMissing": [
       862,
@@ -93,6 +93,7 @@
       18761,
       22267,
       22314,
+      22315,
       22317,
       22318,
       22319,
@@ -113,9 +114,13 @@
       22339,
       22340,
       22342,
+      22343,
       22345,
+      22398,
       22401,
+      22472,
       217727,
+      219343,
       226815,
       226816,
       226817,
@@ -212,7 +217,7 @@
     "qualityMismatch": []
   },
   "effectSpells": {
-    "total": 2025,
-    "filled": 1947
+    "total": 2028,
+    "filled": 1950
   }
 }

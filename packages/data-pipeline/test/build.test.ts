@@ -17,7 +17,7 @@ import { buildLegacy } from "../src/legacy.js";
 import { buildUnassigned } from "../src/unassigned.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70938";
+const BUILD = "1.60.1.70959";
 const load = (dir: string) => buildClassTalents(openRawTables(join(root, "data", "raw", dir)), BUILD, "esES");
 
 /** Con los hotfixes de la cache del juego aplicados: la verdad "en vivo". */
@@ -28,7 +28,7 @@ const legacyData = buildLegacy(openRawTables(join(root, "data", "raw", `${BUILD}
 const byToken = (r: typeof live, t: string) => r.classes.find((c) => c.classToken === t)!;
 const TOKENS = ["DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"];
 
-describe("arboles de talentos de Forever (cliente 1.60.1.70938, con hotfixes)", () => {
+describe("arboles de talentos de Forever (cliente 1.60.1.70959, con hotfixes)", () => {
   it("cumple el esquema en todas las clases", () => {
     for (const c of live.classes) expect(() => ClassTalents.parse(c)).not.toThrow();
   });
@@ -1170,14 +1170,15 @@ describe("textos de los talentos del Sacerdote frente a la referencia", () => {
           total++;
           if (nums(t.desc[r]) !== nums(o.descriptions[r])) {
             diff.push(`${o.name} r${r + 1}`);
-            expect(o.descriptionsApproximate, `${o.name} r${r + 1} difiere de la referencia y no esta marcado como valor base`).toBe(true);
+            // Unirse a vampírica: hotfix del 70959 (sanación al grupo 20 % → 10 %, el cliente lo trae y añade «Recibes un 100 % más de sanación»); la referencia aún trae 20 %
+            if (o.name !== "Unirse a vampírica") expect(o.descriptionsApproximate, `${o.name} r${r + 1} difiere de la referencia y no esta marcado como valor base`).toBe(true);
           }
         }
       }
     });
     expect(total).toBe(148);
     // Penitencia y Nova Sagrada: cifras que escalan con el nivel (valor base frente al del nivel 60 de la referencia). Sanación conjunta ya coincide con la referencia (70707: sale del árbol y se entrena)
-    expect(diff).toEqual(["Penitencia r1", "Nova Sagrada r1"]);
+    expect(diff).toEqual(["Penitencia r1", "Nova Sagrada r1", "Unirse a vampírica r1"]);
   });
 
   it("las variables del personaje se resuelven sin poder con hechizos: Egida divina 1200 (20 x $pl) y Rezo de alivio 172 ($bh y $bc valen 0), como la referencia", () => {
@@ -1468,7 +1469,7 @@ describe("estadisticas por clase y nivel del cliente (PlayerExpectedStat y ChrCl
 });
 
 
-describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70938)", () => {
+describe("condicionales de la plantilla, requisitos de objeto equipado y mano de las armas (cliente 1.60.1.70959)", () => {
   const raw = openRawTables(join(root, "data", "raw", `${BUILD}-hotfix`));
   const abilitiesOf = (classId: number) => buildAbilities(raw, live.spells, classId, BUILD, "esES", live.classes.find((c) => c.classId === classId))!;
   const COND = /\uE000([sa]\d+(?:\|[sa]\d+)*)\uE001([^\uE001]*)\uE001([^\uE002]*)\uE002/;

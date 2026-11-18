@@ -2,7 +2,7 @@
 // Vistazo rápido a DBCache.bin (hotfixes del servidor): qué tablas y qué ids trae que NUESTRO último volcado no tiene, sin arrancar wow.tools.local
 // (que tarda de 8 a 25 min en leerla). Solo lectura: abre el fichero, lo lee entero y lo cierra; no escribe nada, ni en el cliente.
 //
-// Uso:  node tools/update/cache-peek.mjs [DBCache.bin] [--base <carpeta de volcado, p. ej. data/raw/1.60.1.70938-hotfix>] [--max N] [--json salida.json]
+// Uso:  node tools/update/cache-peek.mjs [DBCache.bin] [--base <carpeta de volcado, p. ej. data/raw/1.60.1.70959-hotfix>] [--max N] [--json salida.json]
 //   sin ruta: la caché esES del cliente instalado (lectura directa; si el juego está abierto, mejor una copia)
 //   sin --base: el volcado `-hotfix` más reciente de data/raw
 //

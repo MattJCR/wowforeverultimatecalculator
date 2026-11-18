@@ -10,7 +10,7 @@ import { loadRetired } from "../src/server-retired.js";
 import { applyWowsims, buildCombatRatings, buildEnchants, buildRandomSuffixes, type WowsimsDb } from "../src/wowsims.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const BUILD = "1.60.1.70938";
+const BUILD = "1.60.1.70959";
 const WS = join(root, "data", "external", "wowsims");
 const RAW = join(root, "data", "raw", `${BUILD}-hotfix`);
 const ready = existsSync(join(WS, "db.json")) && existsSync(join(WS, "CombatRatings.txt")) && existsSync(join(RAW, "RandPropPoints.csv"));

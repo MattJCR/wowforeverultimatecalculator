@@ -1,6 +1,6 @@
 // Genera el addon WFUC_ItemCache en tools/addon/WFUC_ItemCache/ (fuera del cliente; NO lo instala).
 // Pide al servidor, poco a poco, los objetos que conocemos y que la caché local de hotfixes (DBCache.bin) no trae.
-// Uso: node tools/extract/build-itemcache-addon.mjs [build]     (por defecto 1.60.1.70938)
+// Uso: node tools/extract/build-itemcache-addon.mjs [build]     (por defecto 1.60.1.70959)
 // El usuario copia la carpeta a Interface\AddOns a mano, juega con el botón del minimapa (o /wfucitems start) y, tras salir
 // bien del juego, se repite la lectura de hotfixes (docs/EXTRACTION.md). El cliente sigue siendo solo lectura para las herramientas.
 import fs from "node:fs";
@@ -8,7 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const BUILD = process.argv[2] ?? "1.60.1.70938";
+const BUILD = process.argv[2] ?? "1.60.1.70959";
 const OUT = path.join(ROOT, "tools", "addon", "WFUC_ItemCache");
 // Ritmo: 10 peticiones por segundo (antes 5 cada 2 s). El cliente agrupa las peticiones de una misma tanda en una sola consulta al servidor, y el propio juego
 // pide de golpe decenas de objetos al abrir la casa de subastas o el diario de mazmorras; por eso 10/s es un ritmo normal. Para no dar por retirado lo que solo fue
